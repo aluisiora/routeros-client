@@ -57,3 +57,17 @@ typings/
 # dotenv environment variables file
 .env
 
+# Ignore built ts files
+dist/**/*
+
+# Temp files
+temp
+
+# OS metadata
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea
+*.iml
+.vscode
