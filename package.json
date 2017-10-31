@@ -1,0 +1,49 @@
+{
+  "name": "routeros-client",
+  "version": "0.0.1",
+  "description": "Abstraction layer over the node-routeros API",
+  "main": "./dist/index",
+  "types": "./dist/index",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aluisiora/routeros-client.git"
+  },
+  "keywords": [
+    "routeros",
+    "routerboard",
+    "mikrotik",
+    "routerboard-api",
+    "mikrotik-api",
+    "node-routeros",
+    "javascript",
+    "typescript",
+    "node",
+    "nodejs",
+    "api",
+    "ros"
+  ],
+  "author": "Aluisio Rodrigues Amaral",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aluisiora/routeros-client/issues"
+  },
+  "homepage": "https://github.com/aluisiora/routeros-client#readme",
+  "devDependencies": {
+    "@types/debug": "0.0.30",
+    "mocha": "^4.0.1",
+    "should": "^13.1.0",
+    "tslint": "^5.7.0",
+    "typescript": "^2.5.3"
+  },
+  "dependencies": {
+    "@types/node": "^6.0.90",
+    "debug": "^3.1.0",
+    "node-routeros": "^1.0.3"
+  }
+}
