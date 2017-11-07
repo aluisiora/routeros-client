@@ -15,33 +15,37 @@ export abstract class RouterOSAPICrud {
     }
 
     public add(data: object): Promise<object[]> {
+        return this.exec("add");
+    }
+
+    public exec(command: string, data?: object): Promise<object[]> {
         this.makeQuery(data);
-        const query = this.fullQuery("/add");
+        const query = this.fullQuery("/" + command);
         return this.write(query);
     }
 
-    public delete(): void {
+    public delete(): Promise<object[]> {
+        return this.remove();
+    }
+
+    public move(): Promise<object[]> {
         return;
     }
 
-    public move(): void {
+    public update(data: object): Promise<object[]> {
+        return this.exec("set");
+    }
+
+    public unset(): Promise<object[]> {
         return;
     }
 
-    public update(): void {
-        return;
+    public remove(): Promise<object[]> {
+        return this.exec("remove");
     }
 
-    public unset(): void {
-        return;
-    }
-
-    public remove(): void {
-        return;
-    }
-
-    public set(): void {
-        return;
+    public set(data: object): Promise<object[]> {
+        return this.update(data);
     }
 
     protected fullQuery(append: string): string[] {

@@ -1,4 +1,4 @@
-import { RouterOSAPI, RosException } from "node-routeros";
+import { RouterOSAPI, RosException, Stream } from "node-routeros";
 import { RouterOSAPICrud } from "./RosApiCrud";
 
 export class RosApiOperations extends RouterOSAPICrud {
@@ -124,6 +124,10 @@ export class RosApiOperations extends RouterOSAPICrud {
     }
 
     public exec(): Promise<object[]> {
+        return;
+    }
+
+    public stream(): Stream {
         return;
     }
     
