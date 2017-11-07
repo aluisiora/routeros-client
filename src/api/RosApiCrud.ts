@@ -17,6 +17,22 @@ export abstract class RouterOSAPICrud {
     public add(data: object): Promise<object[]> {
         return this.exec("add");
     }
+    
+    public create(data: object): Promise<object[]> {
+        return this.add(data);
+    }
+
+    public disable(): Promise<object[]> {
+        return this.exec("disable");
+    }
+
+    public enable(): Promise<object[]> {
+        return this.exec("enable");
+    }
+
+    public delete(ids: string | string[] | number[]): Promise<object[]> {
+        return this.remove(ids);
+    }
 
     public exec(command: string, data?: object): Promise<object[]> {
         this.makeQuery(data);
@@ -24,11 +40,7 @@ export abstract class RouterOSAPICrud {
         return this.write(query);
     }
 
-    public delete(): Promise<object[]> {
-        return this.remove();
-    }
-
-    public move(): Promise<object[]> {
+    public move(from: string | string[] | number[], to: string | number): Promise<object[]> {
         return;
     }
 
@@ -40,7 +52,8 @@ export abstract class RouterOSAPICrud {
         return;
     }
 
-    public remove(): Promise<object[]> {
+    public remove(ids: string | string[] | number[]): Promise<object[]> {
+        this.queryVal.push("=numbers=" + ids);
         return this.exec("remove");
     }
 

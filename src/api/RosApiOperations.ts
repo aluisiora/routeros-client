@@ -101,6 +101,10 @@ export class RosApiOperations extends RouterOSAPICrud {
         return this.get(data);
     }
 
+    public getCollection(): object[] {
+        return;
+    }
+
     public print(data?: object): Promise<object[]> {
         return this.get(data);
     }
@@ -123,7 +127,10 @@ export class RosApiOperations extends RouterOSAPICrud {
         return this.find(data);
     }
 
-    public exec(): Promise<object[]> {
+    /**
+     * Remove all entries of the current menu
+     */
+    public purge(): Promise<object> {
         return;
     }
 
