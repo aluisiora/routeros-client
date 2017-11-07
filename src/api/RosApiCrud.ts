@@ -24,6 +24,10 @@ export abstract class RouterOSAPICrud {
         return;
     }
 
+    public move(): void {
+        return;
+    }
+
     public update(): void {
         return;
     }
@@ -62,6 +66,8 @@ export abstract class RouterOSAPICrud {
 
                 // if selecting for id, convert it to .id to match mikrotik standards
                 if (tmpKey === "id") tmpKey = ".id";
+                if (tmpKey === "nextid") tmpKey = ".nextid";
+                if (tmpKey === "dead") tmpKey = ".dead";
 
                 if (tmpVal === true) tmpVal = "yes";
                 if (tmpVal === false) tmpVal = "no";

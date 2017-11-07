@@ -1,4 +1,4 @@
-import { RouterOSAPI } from "node-routeros";
+import { RouterOSAPI, RosException } from "node-routeros";
 import { RouterOSAPICrud } from "./RosApiCrud";
 
 export class RosApiOperations extends RouterOSAPICrud {
@@ -91,29 +91,36 @@ export class RosApiOperations extends RouterOSAPICrud {
         return this;
     }
 
-    public get(): Promise<object[]> {
+    public get(data?: object): Promise<object[]> {
+        if (data) this.makeQuery(data);
         const query = this.fullQuery("/print");
         return this.write(query);
     }
 
-    public getAll(): Promise<object[]> {
-        return this.get();
+    public getAll(data?: object): Promise<object[]> {
+        return this.get(data);
     }
 
-    public print(): Promise<object[]> {
-        return this.get();
+    public print(data?: object): Promise<object[]> {
+        return this.get(data);
     }
 
-    public find(): Promise<object[]> {
-        return;
+    public find(data?: object): Promise<object> {
+        return this.get(data).then((results) => {
+            let result: object = new Object();
+            if (results.length > 0) result = results[0];
+            return Promise.resolve(result);
+        }).catch((err: RosException) => {
+            return Promise.reject(err);
+        });
     }
 
-    public getOne(): Promise<object[]> {
-        return;
+    public getOne(data?: object): Promise<object> {
+        return this.find(data);
     }
 
-    public getOnly(): Promise<object[]> {
-        return;
+    public getOnly(data?: object): Promise<object> {
+        return this.find(data);
     }
 
     public exec(): Promise<object[]> {
