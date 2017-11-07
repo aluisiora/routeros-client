@@ -7,33 +7,76 @@ export class RosApiOperations implements IRouterOSAPICrud {
 
     private path: string;
 
+    private proplistVal: string;
+
     constructor(api: RouterOSAPI, path: string) {
         this.api = api;
-        this.path = path;
+        this.path = path.replace(/ /g, "/");
     }
 
-    public select(): void {
-        return;
+    public select(fields: string | string[]): RosApiOperations {
+        let commaFields: string = ".proplist=";
+        if (Array.isArray(fields)) {
+            for (const key in fields) {
+                if (fields.hasOwnProperty(key)) {
+                    if (fields[key] === "id") fields[key] = ".id";
+                }
+            }
+            // Convert array to string comma separated and clean any space left
+            commaFields += ("" + fields).replace(/ /g, "");
+        } else {
+            commaFields += fields;
+        }
+        // Replace any underline to hiphen if used
+        this.proplistVal = commaFields.replace(/_/g, "-");
+        
+        return this;
     }
 
-    public only(): void {
-        return;
+    /**
+     * Alias for select()
+     * @param fields
+     */
+    public only(fields: string | string[]): RosApiOperations {
+        return this.select(fields);
     }
 
-    public proplist(): void {
-        return;
+    /**
+     * Alias for select()
+     * @param fields 
+     */
+    public proplist(fields: string | string[]): RosApiOperations {
+        return this.select(fields);
     }
 
-    public where(): void {
-        return;
+    public where(key: object | string, value?: string): RosApiOperations {
+        let search: object = {};
+        if (typeof key === "string") {
+            search[key] = value || "";
+        } else {
+            search = key;
+        }
+        return this.makeQuery(search);
     }
 
-    public query(): void {
-        return;
+    public orWhere(): RosApiOperations {
+        return this;
     }
 
-    public filter(): void {
-        return;
+    public andWhere(): RosApiOperations {
+        return this;
+    }
+
+    public notWhere(): RosApiOperations {
+        return this;
+    }
+
+    public query(): RosApiOperations {
+        return this;
+    }
+
+    public filter(): RosApiOperations {
+        return this;
     }
 
     public get(): void {
@@ -82,5 +125,9 @@ export class RosApiOperations implements IRouterOSAPICrud {
 
     public remove(): void {
         return;
+    }
+
+    private makeQuery(searchParameters: object, addQuote: boolean = false): RosApiOperations {
+        return this;
     }
 }
