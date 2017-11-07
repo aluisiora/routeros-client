@@ -1,4 +1,4 @@
-import { IRouterOSAPICrud } from "./IRosApiCrud";
+import { RouterOSAPICrud } from "./RosApiCrud";
 
 export class RosApiCollection {
 

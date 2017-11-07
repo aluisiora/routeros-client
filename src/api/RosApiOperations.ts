@@ -1,35 +1,23 @@
 import { RouterOSAPI } from "node-routeros";
-import { IRouterOSAPICrud } from "./IRosApiCrud";
+import { RouterOSAPICrud } from "./RosApiCrud";
 
-export class RosApiOperations implements IRouterOSAPICrud {
-
-    private api: RouterOSAPI;
-
-    private path: string;
-
-    private proplistVal: string;
+export class RosApiOperations extends RouterOSAPICrud {
 
     constructor(api: RouterOSAPI, path: string) {
-        this.api = api;
+        super(api);
         this.path = path.replace(/ /g, "/");
     }
 
     public select(fields: string | string[]): RosApiOperations {
         let commaFields: string = ".proplist=";
-        if (Array.isArray(fields)) {
-            for (const key in fields) {
-                if (fields.hasOwnProperty(key)) {
-                    if (fields[key] === "id") fields[key] = ".id";
-                }
-            }
-            // Convert array to string comma separated and clean any space left
-            commaFields += ("" + fields).replace(/ /g, "");
-        } else {
+        if (typeof fields === "string") {
             commaFields += fields;
+        } else {
+            // Convert array to a string comma separated and clean any space left
+            commaFields += ("" + fields).replace(/ /g, "");
         }
         // Replace any underline to hiphen if used
         this.proplistVal = commaFields.replace(/_/g, "-");
-        
         return this;
     }
 
@@ -49,33 +37,57 @@ export class RosApiOperations implements IRouterOSAPICrud {
         return this.select(fields);
     }
 
-    public where(key: object | string, value?: string): RosApiOperations {
-        let search: object = {};
+    public where(key: object | string, value: string = ""): RosApiOperations {
+        let search: object = new Object();
         if (typeof key === "string") {
-            search[key] = value || "";
+            search[key] = value;
         } else {
             search = key;
         }
-        return this.makeQuery(search);
-    }
-
-    public orWhere(): RosApiOperations {
+        this.makeQuery(search, true);
         return this;
     }
 
-    public andWhere(): RosApiOperations {
+    public query(key: object | string, value?: string): RosApiOperations {
+        return this.where(key, value);
+    }
+
+    public filter(key: object | string, value?: string): RosApiOperations {
+        return this.where(key, value);
+    }
+
+    public whereRaw(search: string[]): RosApiOperations {
+        this.queryVal = this.queryVal.concat(search);
         return this;
     }
 
-    public notWhere(): RosApiOperations {
+    public orWhere(key: string, value: string): RosApiOperations {
+        this.where(key, value);
+        this.queryVal.push("?#|");
         return this;
     }
 
-    public query(): RosApiOperations {
+    public orWhereNot(key: string, value: string): RosApiOperations {
+        this.where(key, value);
+        this.queryVal.push("?#!", "?#|");
         return this;
     }
 
-    public filter(): RosApiOperations {
+    public andWhere(key: string, value: string): RosApiOperations {
+        this.where(key, value);
+        this.queryVal.push("?#&");
+        return this;
+    }
+
+    public andWhereNot(key: string, value: string): RosApiOperations {
+        this.where(key, value);
+        this.queryVal.push("?#!", "?#&");
+        return this;
+    }
+
+    public whereNot(key: string, value: string): RosApiOperations {
+        this.where(key, value);
+        this.queryVal.push("?#!");
         return this;
     }
 
@@ -106,28 +118,5 @@ export class RosApiOperations implements IRouterOSAPICrud {
     public exec(): void {
         return;
     }
-
-    public set(): void {
-        return;
-    }
-
-    public update(): void {
-        return;
-    }
-
-    public unset(): void {
-        return;
-    }
-
-    public delete(): void {
-        return;
-    }
-
-    public remove(): void {
-        return;
-    }
-
-    private makeQuery(searchParameters: object, addQuote: boolean = false): RosApiOperations {
-        return this;
-    }
+    
 }
