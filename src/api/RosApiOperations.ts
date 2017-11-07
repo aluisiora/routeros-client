@@ -91,31 +91,32 @@ export class RosApiOperations extends RouterOSAPICrud {
         return this;
     }
 
-    public get(): void {
+    public get(): Promise<object[]> {
+        const query = this.fullQuery("/print");
+        return this.write(query);
+    }
+
+    public getAll(): Promise<object[]> {
+        return this.get();
+    }
+
+    public print(): Promise<object[]> {
+        return this.get();
+    }
+
+    public find(): Promise<object[]> {
         return;
     }
 
-    public getAll(): void {
+    public getOne(): Promise<object[]> {
         return;
     }
 
-    public print(): void {
+    public getOnly(): Promise<object[]> {
         return;
     }
 
-    public find(): void {
-        return;
-    }
-
-    public getOne(): void {
-        return;
-    }
-
-    public getOnly(): void {
-        return;
-    }
-
-    public exec(): void {
+    public exec(): Promise<object[]> {
         return;
     }
     

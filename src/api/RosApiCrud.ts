@@ -16,7 +16,8 @@ export abstract class RouterOSAPICrud {
 
     public add(data: object): Promise<object[]> {
         this.makeQuery(data);
-        return this.write();
+        const query = this.fullQuery("/add");
+        return this.write(query);
     }
 
     public delete(): void {
@@ -75,8 +76,7 @@ export abstract class RouterOSAPICrud {
         return this.queryVal;
     }
 
-    protected write(): Promise<object[]> {
-        const query = this.fullQuery("/add");
+    protected write(query: string[]): Promise<object[]> {
         this.queryVal = [];
         this.proplistVal = "";
         return this.api.write(query);
