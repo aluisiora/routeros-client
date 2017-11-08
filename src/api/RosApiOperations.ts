@@ -9,13 +9,25 @@ export class RosApiOperations extends RouterOSAPICrud {
     }
 
     public select(fields: string | string[]): RosApiOperations {
-        let commaFields: string = ".proplist=";
-        if (typeof fields === "string") {
-            commaFields += fields;
-        } else {
-            // Convert array to a string comma separated and clean any space left
-            commaFields += ("" + fields).replace(/ /g, "");
+        let commaFields: string = "=.proplist=";
+        if (typeof fields === "string") fields = [fields];
+        
+        for (let i = 0; i < fields.length; i++) {
+            const field = fields[i];
+            if (/id|dead|nextid/.test(field)) fields[i] = "." + field;
         }
+
+        // Convert array to a string comma separated 
+        commaFields += fields;
+
+        // Clean any empty space left
+        commaFields = commaFields.replace(/ /g, "");
+
+        // Convert camelCase to dashed
+        commaFields = commaFields.replace(/([a-z][A-Z])/g, (g, w) => {
+            return g[0] + "-" + g[1].toLowerCase(); 
+        });
+
         // Replace any underline to hiphen if used
         this.proplistVal = commaFields.replace(/_/g, "-");
         return this;
@@ -104,7 +116,7 @@ export class RosApiOperations extends RouterOSAPICrud {
     public getCollection(data?: object): Promise<object[]> {
         return this.get(data).then((results) => {
             for (let i = 0; i < results.length; i++) {
-                results[i] = new RosApiCollection(this.api, this.path, results[i]);
+                results[i] = new RosApiCollection(this.api, this.pathVal, results[i]);
             }
             return Promise.resolve(results);
         }).catch((err: RosException) => {
@@ -139,7 +151,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      */
     public purge(): Promise<object> {
         return this.write([
-            this.path + "/print",
+            this.pathVal + "/print",
             "=.proplist=.id"
         ]).then((results) => {
             const ids = [];
@@ -147,7 +159,7 @@ export class RosApiOperations extends RouterOSAPICrud {
                 ids.push(result[".id"]);
             });
             return this.write([
-                this.path + "/remove",
+                this.pathVal + "/remove",
                 "=numbers=" + ids
             ]);
         }).catch((err: RosException) => {
@@ -155,10 +167,9 @@ export class RosApiOperations extends RouterOSAPICrud {
         });
     }
 
-    public stream(data?: object): Stream {
-        if (data) this.makeQuery(data);
+    public stream(callback?: () => void): Stream {
         const query = this.fullQuery();
-        return this.api.stream(query);
+        return this.api.stream(query, callback);
     }
     
 }

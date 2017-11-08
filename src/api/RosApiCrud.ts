@@ -1,23 +1,29 @@
-import { RouterOSAPI } from "node-routeros";
+import { RouterOSAPI, RosException } from "node-routeros";
 import * as Types from "./Types";
 
 export abstract class RouterOSAPICrud {
     
-    protected api: RouterOSAPI;
+    protected apiObj: RouterOSAPI;
 
-    protected path: string;
+    protected pathVal: string;
 
     protected proplistVal: string;
 
-    protected queryVal: string[];
+    protected queryVal: string[] = [];
 
     constructor(api: RouterOSAPI, path: string) {
-        this.api = api;
-        this.path = path.replace(/ /g, "/");
+        this.apiObj = api;
+        this.pathVal = path.replace(/ /g, "/");
     }
 
     public add(data: object): Types.SocPromise {
-        return this.exec("add");
+        this.makeQuery(data);
+        return this.exec("add").then((results: any) => {
+            if (results.length > 0) results = results[0];
+            return Promise.resolve(results);
+        }).catch((err: RosException) => {
+            return Promise.reject(err);
+        });
     }
     
     public create(data: object): Types.SocPromise {
@@ -54,6 +60,7 @@ export abstract class RouterOSAPICrud {
 
     public update(data: object, ids?: Types.Id): Types.SocPromise {
         if (ids) this.queryVal.push("=numbers=" + ids);
+        this.makeQuery(data);
         return this.exec("set");
     }
 
@@ -83,9 +90,9 @@ export abstract class RouterOSAPICrud {
     protected fullQuery(append?: string): string[] {
         let val = [];
         if (append) {
-            val.push(this.path + append);
+            val.push(this.pathVal + append);
         } else {
-            val.push(this.path);
+            val.push(this.pathVal);
         }
         if (this.proplistVal) val.push(this.proplistVal);
         return val = val.concat(this.queryVal).slice();
@@ -126,24 +133,7 @@ export abstract class RouterOSAPICrud {
                         break;
                 }
 
-                switch (tmpVal) {
-                    case true:
-                        tmpVal = "yes";
-                        break;
-
-                    case false:
-                        tmpVal = "no";
-                        break;
-
-                    case null:
-                        tmpVal = "";
-                        break;
-                
-                    default:
-                        break;
-                }
-
-                tmpVal = (addQuote ? "?" : "=") + tmpVal;
+                tmpKey = (addQuote ? "?" : "=") + tmpKey;
 
                 this.queryVal.push(tmpKey + "=" + tmpVal);
             }
@@ -155,6 +145,33 @@ export abstract class RouterOSAPICrud {
     protected write(query: string[]): Types.SocPromise {
         this.queryVal = [];
         this.proplistVal = "";
-        return this.api.write(query);
+        return this.apiObj.write(query).then((results) => {
+            return Promise.resolve(this.treatMikrotikProperties(results));
+        }).catch((err: RosException) => {
+            return Promise.reject(err);
+        });
+    }
+
+    private treatMikrotikProperties(results: object[]): object[] {
+        const treatedArr: object[] = [];
+        results.forEach((result) => {
+            const tmpItem = new Object();
+            for (const key in result) {
+                if (result.hasOwnProperty(key)) {
+                    const tmpVal = result[key];
+                    const tmpKey = key.replace(/-([a-z])/g, (g) => { 
+                        return g[1].toUpperCase(); 
+                    }).replace(/^\./, "");
+                    tmpItem[tmpKey] = tmpVal;
+                    if (tmpVal === "true" || tmpVal === "false") {
+                        tmpItem[tmpKey] = tmpVal === "true";
+                    } else if (/^\d+$/.test(tmpVal)) {
+                        tmpItem[tmpKey] = parseInt(tmpVal, null);
+                    }
+                }
+            }
+            treatedArr.push(tmpItem);
+        });
+        return treatedArr;
     }
 }

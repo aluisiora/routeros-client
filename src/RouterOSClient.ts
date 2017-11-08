@@ -5,14 +5,14 @@ export class RouterOSClient {
 
     private options: IRosOptions;
 
-    private apiObj: RouterOSAPI;
+    private apiObj: RosAPI;
 
     constructor(options: IRosOptions) {
         this.options = options;
-        this.apiObj = new RouterOSAPI(this.options);
+        this.apiObj = new RosAPI(new RouterOSAPI(this.options));
     }
 
-    public api(): RouterOSAPI {
+    public api(): RosAPI {
         return this.apiObj;
     }
 
