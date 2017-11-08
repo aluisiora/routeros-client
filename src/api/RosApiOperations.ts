@@ -101,8 +101,16 @@ export class RosApiOperations extends RouterOSAPICrud {
         return this.get(data);
     }
 
-    public getCollection(): object[] {
-        return;
+    public getCollection(data?: object): Promise<object[]> {
+        return this.get(data).then((results) => {
+            // TODO: a classe de collection
+            // for (let i = 0; i < results.length; i++) {
+            //     results[i] = new RosApiCollection(results[i]);
+            // }
+            return Promise.resolve(results);
+        }).catch((err: RosException) => {
+            return Promise.reject(err);
+        });
     }
 
     public print(data?: object): Promise<object[]> {
@@ -131,7 +139,21 @@ export class RosApiOperations extends RouterOSAPICrud {
      * Remove all entries of the current menu
      */
     public purge(): Promise<object> {
-        return;
+        return this.write([
+            this.path + "/print",
+            "=.proplist=.id"
+        ]).then((results) => {
+            const ids = [];
+            results.forEach((result) => {
+                ids.push(result[".id"]);
+            });
+            return this.write([
+                this.path + "/remove",
+                "=numbers=" + ids
+            ]);
+        }).catch((err: RosException) => {
+            return Promise.reject(err);
+        });
     }
 
     public stream(): Stream {

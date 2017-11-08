@@ -1,4 +1,5 @@
 import { RouterOSAPI } from "node-routeros";
+import * as Types from "./Types";
 
 export abstract class RouterOSAPICrud {
     
@@ -14,50 +15,57 @@ export abstract class RouterOSAPICrud {
         this.api = api;
     }
 
-    public add(data: object): Promise<object[]> {
+    public add(data: object): Types.SocPromise {
         return this.exec("add");
     }
     
-    public create(data: object): Promise<object[]> {
+    public create(data: object): Types.SocPromise {
         return this.add(data);
     }
 
-    public disable(): Promise<object[]> {
+    public disable(): Types.SocPromise {
         return this.exec("disable");
     }
 
-    public enable(): Promise<object[]> {
+    public enable(): Types.SocPromise {
         return this.exec("enable");
     }
 
-    public delete(ids: string | string[] | number[]): Promise<object[]> {
+    public delete(ids?: Types.Id): Types.SocPromise {
         return this.remove(ids);
     }
 
-    public exec(command: string, data?: object): Promise<object[]> {
-        this.makeQuery(data);
+    public exec(command: string, data?: object): Types.SocPromise {
+        if (data) this.makeQuery(data);
         const query = this.fullQuery("/" + command);
         return this.write(query);
     }
 
-    public move(from: string | string[] | number[], to: string | number): Promise<object[]> {
+    public move(to: string | number): Types.SocPromise {
+        
         return;
     }
 
-    public update(data: object): Promise<object[]> {
+    public update(data: object): Types.SocPromise {
         return this.exec("set");
     }
 
-    public unset(): Promise<object[]> {
-        return;
+    public unset(properties?: string | string[]): Types.SocPromise {
+        if (typeof properties === "string") properties = [properties];
+        const $q = [];
+        properties.forEach((property) => {
+            this.queryVal.push("=value-name=" + property);
+            $q.push(this.exec("unset"));
+        });
+        return Promise.all($q);
     }
 
-    public remove(ids: string | string[] | number[]): Promise<object[]> {
-        this.queryVal.push("=numbers=" + ids);
+    public remove(ids?: Types.Id): Types.SocPromise {
+        if (ids) this.queryVal.push("=numbers=" + ids);
         return this.exec("remove");
     }
 
-    public set(data: object): Promise<object[]> {
+    public set(data: object): Types.SocPromise {
         return this.update(data);
     }
 
@@ -99,7 +107,7 @@ export abstract class RouterOSAPICrud {
         return this.queryVal;
     }
 
-    protected write(query: string[]): Promise<object[]> {
+    protected write(query: string[]): Types.SocPromise {
         this.queryVal = [];
         this.proplistVal = "";
         return this.api.write(query);
