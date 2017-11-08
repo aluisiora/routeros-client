@@ -103,6 +103,9 @@ export abstract class RouterOSAPICrud {
         for (const key in searchParameters) {
             if (searchParameters.hasOwnProperty(key)) {
                 tmpVal = searchParameters[key];
+                if (/[A-Z]/.test(tmpKey)) {
+                    tmpKey = tmpKey.replace(/([A-Z])/g, "$1").toLowerCase();
+                }
                 tmpKey = key.replace(/_/, "-");
 
                 // if selecting for id, convert it to .id to match mikrotik standards
