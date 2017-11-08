@@ -52,8 +52,11 @@ export abstract class RouterOSAPICrud {
 
     public unset(properties?: string | string[]): Types.SocPromise {
         if (typeof properties === "string") properties = [properties];
-        const $q = [];
+        const $q: Types.SocPromise[] = [];
+        const curQueryVal = this.queryVal.slice();
+        this.queryVal = [];
         properties.forEach((property) => {
+            this.queryVal = curQueryVal.slice();
             this.queryVal.push("=value-name=" + property);
             $q.push(this.exec("unset"));
         });
