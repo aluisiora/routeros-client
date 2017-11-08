@@ -49,23 +49,23 @@ export class RosApiOperations extends RouterOSAPICrud {
         return this.select(fields);
     }
 
-    public where(key: object | string, value: string = "", addQuote: boolean = true): RosApiOperations {
+    public where(key: object | string, value: string = ""): RosApiOperations {
         let search: object = new Object();
         if (typeof key === "string") {
             search[key] = value;
         } else {
             search = key;
         }
-        this.makeQuery(search, addQuote);
+        this.makeQuery(search);
         return this;
     }
 
     public query(key: object | string, value?: string): RosApiOperations {
-        return this.where(key, value, false);
+        return this.where(key, value);
     }
 
     public filter(key: object | string, value?: string): RosApiOperations {
-        return this.where(key, value, false);
+        return this.where(key, value);
     }
 
     public whereRaw(search: string[]): RosApiOperations {
@@ -105,7 +105,7 @@ export class RosApiOperations extends RouterOSAPICrud {
 
     public get(data?: object): Promise<object[]> {
         if (data) this.makeQuery(data);
-        const query = this.fullQuery("/print");
+        const query = this.fullQuery("/print", true);
         return this.write(query);
     }
 
@@ -116,7 +116,7 @@ export class RosApiOperations extends RouterOSAPICrud {
     public getCollection(data?: object): Promise<object[]> {
         return this.get(data).then((results) => {
             for (let i = 0; i < results.length; i++) {
-                results[i] = new RosApiCollection(this.api, this.pathVal, results[i]);
+                results[i] = new RosApiCollection(this.apiObj, this.pathVal, results[i]);
             }
             return Promise.resolve(results);
         }).catch((err: RosException) => {
@@ -169,7 +169,7 @@ export class RosApiOperations extends RouterOSAPICrud {
 
     public stream(callback?: () => void): Stream {
         const query = this.fullQuery();
-        return this.api.stream(query, callback);
+        return this.apiObj.stream(query, callback);
     }
     
 }

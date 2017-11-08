@@ -17,8 +17,7 @@ export abstract class RouterOSAPICrud {
     }
 
     public add(data: object): Types.SocPromise {
-        this.makeQuery(data);
-        return this.exec("add").then((results: any) => {
+        return this.exec("add", data).then((results: any) => {
             if (results.length > 0) results = results[0];
             return Promise.resolve(results);
         }).catch((err: RosException) => {
@@ -87,7 +86,7 @@ export abstract class RouterOSAPICrud {
         return this.update(data, ids);
     }
 
-    protected fullQuery(append?: string): string[] {
+    protected fullQuery(append?: string, convertToQuote: boolean = false): string[] {
         let val = [];
         if (append) {
             val.push(this.pathVal + append);
@@ -95,15 +94,20 @@ export abstract class RouterOSAPICrud {
             val.push(this.pathVal);
         }
         if (this.proplistVal) val.push(this.proplistVal);
-        return val = val.concat(this.queryVal).slice();
+        val = val.concat(this.queryVal).slice();
+        if (convertToQuote) {
+            for (let i = 0; i < val.length; i++) {
+                val[i] = val[i].replace(/^=/, "?");
+            }
+        }
+        return val;
     }    
 
     /**
      * Make the query array to write on the API
      * @param searchParameters The key-value pair to add to the search
-     * @param addQuote If it is going to use a ? or = operator
      */
-    protected makeQuery(searchParameters: object, addQuote: boolean = false): string[] {
+    protected makeQuery(searchParameters: object): string[] {
         let tmpKey: string;
         let tmpVal: string | number | boolean | null;
 
@@ -133,9 +137,9 @@ export abstract class RouterOSAPICrud {
                         break;
                 }
 
-                tmpKey = (addQuote ? "?" : "=") + tmpKey;
+                // tmpKey = (addQuote ? "?" : "=") + tmpKey;
 
-                this.queryVal.push(tmpKey + "=" + tmpVal);
+                this.queryVal.push("=" + tmpKey + "=" + tmpVal);
             }
         }
 
@@ -145,6 +149,7 @@ export abstract class RouterOSAPICrud {
     protected write(query: string[]): Types.SocPromise {
         this.queryVal = [];
         this.proplistVal = "";
+        console.log(query);
         return this.apiObj.write(query).then((results) => {
             return Promise.resolve(this.treatMikrotikProperties(results));
         }).catch((err: RosException) => {
