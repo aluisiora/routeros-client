@@ -26,33 +26,37 @@ export abstract class RouterOSAPICrud {
     public disable(): Types.SocPromise {
         return this.exec("disable");
     }
-
-    public enable(): Types.SocPromise {
-        return this.exec("enable");
-    }
-
+    
     public delete(ids?: Types.Id): Types.SocPromise {
         return this.remove(ids);
     }
 
+    public enable(): Types.SocPromise {
+        return this.exec("enable");
+    }
+    
     public exec(command: string, data?: object): Types.SocPromise {
         if (data) this.makeQuery(data);
         const query = this.fullQuery("/" + command);
         return this.write(query);
     }
 
-    public move(to: string | number): Types.SocPromise {
-        
-        return;
+    public move(from: Types.Id, to?: string | number): Types.SocPromise {
+        if (!Array.isArray(from)) from = [from];
+        this.queryVal.push("=numbers=" + from);
+        if (to) this.queryVal.push("=destination=" + to);
+        return this.exec("move");
     }
 
     public update(data: object): Types.SocPromise {
         return this.exec("set");
     }
 
-    public unset(properties?: string | string[]): Types.SocPromise {
+    public unset(ids: Types.Id, properties: string | string[]): Types.SocPromise {
+        if (!Array.isArray(ids)) ids = [ids];
         if (typeof properties === "string") properties = [properties];
         const $q: Types.SocPromise[] = [];
+        this.queryVal.push("=numbers=" + ids);
         const curQueryVal = this.queryVal.slice();
         this.queryVal = [];
         properties.forEach((property) => {
