@@ -6,11 +6,8 @@ export class RosAPI implements IRosSocket {
 
     private api: RouterOSAPI;
 
-    private options: IRosOptions;
-
-    constructor(options: IRosOptions) {
-        this.options = options;
-        this.api = new RouterOSAPI(this.options);
+    constructor(api: RouterOSAPI) {
+        this.api = api;
     }
 
     public connect(): Promise<RosApiMenu> {
