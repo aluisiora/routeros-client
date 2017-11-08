@@ -1,11 +1,11 @@
 import { RouterOSAPI, RosException, Stream } from "node-routeros";
 import { RouterOSAPICrud } from "./RosApiCrud";
+import { RosApiCollection } from "./RosApiCollection";
 
 export class RosApiOperations extends RouterOSAPICrud {
 
     constructor(api: RouterOSAPI, path: string) {
-        super(api);
-        this.path = path.replace(/ /g, "/");
+        super(api, path);
     }
 
     public select(fields: string | string[]): RosApiOperations {
@@ -37,23 +37,23 @@ export class RosApiOperations extends RouterOSAPICrud {
         return this.select(fields);
     }
 
-    public where(key: object | string, value: string = ""): RosApiOperations {
+    public where(key: object | string, value: string = "", addQuote: boolean = true): RosApiOperations {
         let search: object = new Object();
         if (typeof key === "string") {
             search[key] = value;
         } else {
             search = key;
         }
-        this.makeQuery(search, true);
+        this.makeQuery(search, addQuote);
         return this;
     }
 
     public query(key: object | string, value?: string): RosApiOperations {
-        return this.where(key, value);
+        return this.where(key, value, false);
     }
 
     public filter(key: object | string, value?: string): RosApiOperations {
-        return this.where(key, value);
+        return this.where(key, value, false);
     }
 
     public whereRaw(search: string[]): RosApiOperations {
@@ -103,10 +103,9 @@ export class RosApiOperations extends RouterOSAPICrud {
 
     public getCollection(data?: object): Promise<object[]> {
         return this.get(data).then((results) => {
-            // TODO: a classe de collection
-            // for (let i = 0; i < results.length; i++) {
-            //     results[i] = new RosApiCollection(results[i]);
-            // }
+            for (let i = 0; i < results.length; i++) {
+                results[i] = new RosApiCollection(this.api, this.path, results[i]);
+            }
             return Promise.resolve(results);
         }).catch((err: RosException) => {
             return Promise.reject(err);
@@ -156,8 +155,10 @@ export class RosApiOperations extends RouterOSAPICrud {
         });
     }
 
-    public stream(): Stream {
-        return;
+    public stream(data?: object): Stream {
+        if (data) this.makeQuery(data);
+        const query = this.fullQuery();
+        return this.api.stream(query);
     }
     
 }

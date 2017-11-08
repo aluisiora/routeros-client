@@ -11,8 +11,9 @@ export abstract class RouterOSAPICrud {
 
     protected queryVal: string[];
 
-    constructor(api: RouterOSAPI) {
+    constructor(api: RouterOSAPI, path: string) {
         this.api = api;
+        this.path = path.replace(/ /g, "/");
     }
 
     public add(data: object): Types.SocPromise {
@@ -23,15 +24,18 @@ export abstract class RouterOSAPICrud {
         return this.add(data);
     }
 
-    public disable(): Types.SocPromise {
+    public disable(ids?: Types.Id): Types.SocPromise {
+        if (ids) this.queryVal.push("=numbers=" + ids);
         return this.exec("disable");
     }
     
     public delete(ids?: Types.Id): Types.SocPromise {
+        if (ids) this.queryVal.push("=numbers=" + ids);
         return this.remove(ids);
     }
 
-    public enable(): Types.SocPromise {
+    public enable(ids?: Types.Id): Types.SocPromise {
+        if (ids) this.queryVal.push("=numbers=" + ids);
         return this.exec("enable");
     }
     
@@ -48,15 +52,15 @@ export abstract class RouterOSAPICrud {
         return this.exec("move");
     }
 
-    public update(data: object): Types.SocPromise {
+    public update(data: object, ids?: Types.Id): Types.SocPromise {
+        if (ids) this.queryVal.push("=numbers=" + ids);
         return this.exec("set");
     }
 
-    public unset(ids: Types.Id, properties: string | string[]): Types.SocPromise {
-        if (!Array.isArray(ids)) ids = [ids];
+    public unset(properties: string | string[], ids?: Types.Id): Types.SocPromise {
+        if (ids) this.queryVal.push("=numbers=" + ids);
         if (typeof properties === "string") properties = [properties];
         const $q: Types.SocPromise[] = [];
-        this.queryVal.push("=numbers=" + ids);
         const curQueryVal = this.queryVal.slice();
         this.queryVal = [];
         properties.forEach((property) => {
@@ -72,12 +76,17 @@ export abstract class RouterOSAPICrud {
         return this.exec("remove");
     }
 
-    public set(data: object): Types.SocPromise {
-        return this.update(data);
+    public set(data: object, ids?: Types.Id): Types.SocPromise {
+        return this.update(data, ids);
     }
 
-    protected fullQuery(append: string): string[] {
-        let val = [this.path + append];
+    protected fullQuery(append?: string): string[] {
+        let val = [];
+        if (append) {
+            val.push(this.path + append);
+        } else {
+            val.push(this.path);
+        }
         if (this.proplistVal) val.push(this.proplistVal);
         return val = val.concat(this.queryVal).slice();
     }    
@@ -97,13 +106,39 @@ export abstract class RouterOSAPICrud {
                 tmpKey = key.replace(/_/, "-");
 
                 // if selecting for id, convert it to .id to match mikrotik standards
-                if (tmpKey === "id") tmpKey = ".id";
-                if (tmpKey === "nextid") tmpKey = ".nextid";
-                if (tmpKey === "dead") tmpKey = ".dead";
+                switch (tmpKey) {
+                    case "id":
+                        tmpKey = ".id";
+                        break;
 
-                if (tmpVal === true) tmpVal = "yes";
-                if (tmpVal === false) tmpVal = "no";
-                if (tmpVal === null) tmpVal = "";
+                    case "next":
+                        tmpKey = ".nextid";
+                        break;
+
+                    case "dead":
+                        tmpKey = ".dead";
+                        break;
+
+                    default: 
+                        break;
+                }
+
+                switch (tmpVal) {
+                    case true:
+                        tmpVal = "yes";
+                        break;
+
+                    case false:
+                        tmpVal = "no";
+                        break;
+
+                    case null:
+                        tmpVal = "";
+                        break;
+                
+                    default:
+                        break;
+                }
 
                 tmpVal = (addQuote ? "?" : "=") + tmpVal;
 
