@@ -16,7 +16,10 @@ export abstract class RouterOSAPICrud {
     constructor(rosApi: RouterOSAPI, path: string, snakeCase: boolean) {
         this.rosApi = rosApi;
         this.snakeCase = snakeCase;
-        this.pathVal = path.replace(/ /g, "/");
+        this.pathVal = path
+            .replace(/ /g, "/")
+            .replace(/(print|enable|disable|add|set|remove|getall|move)$/, "")
+            .replace(/\/$/, "");
     }
 
     public add(data: object): Types.SocPromise {
