@@ -6,8 +6,8 @@ export class RosApiCollection extends RouterOSAPICrud {
 
     private originalItem: any;
 
-    constructor(api: RouterOSAPI, path: string, item: any) {
-        super(api, path);
+    constructor(rosApi: RouterOSAPI, path: string, item: any) {
+        super(rosApi, path);
         this.originalItem = item;
         this.dissolveProperties();
     }

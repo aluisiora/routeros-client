@@ -1,34 +1,33 @@
 import { RouterOSAPI, IRosOptions, RosException } from "node-routeros";
-import { IRosSocket } from "./IRosSocket";
 import { RosApiMenu } from "./RosApiMenu";
 
-export class RouterOSClient implements IRosSocket {
+export class RouterOSClient {
 
     private options: IRosOptions;
 
-    private api: RouterOSAPI;
+    private rosApi: RouterOSAPI;
 
     constructor(options: IRosOptions) {
         this.options = options;
-        this.api = new RouterOSAPI(this.options);
+        this.rosApi = new RouterOSAPI(this.options);
     }
 
     public connect(): Promise<RosApiMenu> {
-        const apiMenu = this.apiMenu();
-        if (this.api.connected) return Promise.resolve(apiMenu);
-        return this.api.connect().then(() => {
-            return Promise.resolve(apiMenu);
+        const api = this.api();
+        if (this.rosApi.connected) return Promise.resolve(api);
+        return this.rosApi.connect().then(() => {
+            return Promise.resolve(api);
         }).catch((err: Error) => {
             return Promise.reject(err);
         });
     }
 
-    public apiMenu(): RosApiMenu {
-        return new RosApiMenu(this.api);
+    public api(): RosApiMenu {
+        return new RosApiMenu(this.rosApi);
     }
 
     public disconnect(): Promise<RouterOSAPI> {
-        return this.api.close();
+        return this.rosApi.close();
     }
 
     public close(): Promise<RouterOSAPI> {

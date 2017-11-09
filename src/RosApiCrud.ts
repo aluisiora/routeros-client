@@ -3,7 +3,7 @@ import * as Types from "./Types";
 
 export abstract class RouterOSAPICrud {
     
-    protected apiObj: RouterOSAPI;
+    protected rosApi: RouterOSAPI;
 
     protected pathVal: string;
 
@@ -11,8 +11,8 @@ export abstract class RouterOSAPICrud {
 
     protected queryVal: string[] = [];
 
-    constructor(api: RouterOSAPI, path: string) {
-        this.apiObj = api;
+    constructor(rosApi: RouterOSAPI, path: string) {
+        this.rosApi = rosApi;
         this.pathVal = path.replace(/ /g, "/");
     }
 
@@ -150,7 +150,7 @@ export abstract class RouterOSAPICrud {
         this.queryVal = [];
         this.proplistVal = "";
         console.log(query);
-        return this.apiObj.write(query).then((results) => {
+        return this.rosApi.write(query).then((results) => {
             return Promise.resolve(this.treatMikrotikProperties(results));
         }).catch((err: RosException) => {
             return Promise.reject(err);

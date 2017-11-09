@@ -4,8 +4,8 @@ import { RosApiCollection } from "./RosApiCollection";
 
 export class RosApiOperations extends RouterOSAPICrud {
 
-    constructor(api: RouterOSAPI, path: string) {
-        super(api, path);
+    constructor(rosApi: RouterOSAPI, path: string) {
+        super(rosApi, path);
     }
 
     public select(fields: string | string[]): RosApiOperations {
@@ -116,7 +116,7 @@ export class RosApiOperations extends RouterOSAPICrud {
     public getCollection(data?: object): Promise<object[]> {
         return this.get(data).then((results) => {
             for (let i = 0; i < results.length; i++) {
-                results[i] = new RosApiCollection(this.apiObj, this.pathVal, results[i]);
+                results[i] = new RosApiCollection(this.rosApi, this.pathVal, results[i]);
             }
             return Promise.resolve(results);
         }).catch((err: RosException) => {
@@ -169,7 +169,7 @@ export class RosApiOperations extends RouterOSAPICrud {
 
     public stream(callback?: () => void): Stream {
         const query = this.fullQuery();
-        return this.apiObj.stream(query, callback);
+        return this.rosApi.stream(query, callback);
     }
     
 }
