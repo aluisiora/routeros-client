@@ -11,8 +11,11 @@ export abstract class RouterOSAPICrud {
 
     protected queryVal: string[] = [];
 
-    constructor(rosApi: RouterOSAPI, path: string) {
+    protected snakeCase: boolean;
+
+    constructor(rosApi: RouterOSAPI, path: string, snakeCase: boolean) {
         this.rosApi = rosApi;
+        this.snakeCase = snakeCase;
         this.pathVal = path.replace(/ /g, "/");
     }
 
@@ -95,10 +98,9 @@ export abstract class RouterOSAPICrud {
         }
         if (this.proplistVal) val.push(this.proplistVal);
         val = val.concat(this.queryVal).slice();
-        if (convertToQuote) {
-            for (let i = 0; i < val.length; i++) {
-                val[i] = val[i].replace(/^=/, "?");
-            }
+        for (let i = 0; i < val.length; i++) {
+            val[i] = this.camelCaseOrSnakeCaseToDashedCase(val[i]);
+            if (convertToQuote) val[i] = val[i].replace(/^=/, "?");
         }
         return val;
     }    
@@ -149,12 +151,32 @@ export abstract class RouterOSAPICrud {
     protected write(query: string[]): Types.SocPromise {
         this.queryVal = [];
         this.proplistVal = "";
-        console.log(query);
         return this.rosApi.write(query).then((results) => {
             return Promise.resolve(this.treatMikrotikProperties(results));
         }).catch((err: RosException) => {
             return Promise.reject(err);
         });
+    }
+
+    private camelCaseOrSnakeCaseToDashedCase(val: string): string {
+        // Clean any empty space left
+        return val.replace(/ /g, "")
+            // Convert camelCase to dashed
+            .replace(/([a-z][A-Z])/g, (g, w) => {
+                return g[0] + "-" + g[1].toLowerCase();
+            })
+            // Replace any underline to hiphen if used
+            .replace(/_/g, "-");
+    }
+
+    private dashedCaseToCamelCase(val: string): string {
+        return val.replace(/-([a-z])/g, (g) => {
+            return g[1].toUpperCase();
+        });
+    }
+
+    private dashedCaseToSnakeCase(val: string): string {
+        return val.replace(/-/g, "_");
     }
 
     private treatMikrotikProperties(results: object[]): object[] {
@@ -164,9 +186,10 @@ export abstract class RouterOSAPICrud {
             for (const key in result) {
                 if (result.hasOwnProperty(key)) {
                     const tmpVal = result[key];
-                    const tmpKey = key.replace(/-([a-z])/g, (g) => { 
-                        return g[1].toUpperCase(); 
-                    }).replace(/^\./, "");
+                    let tmpKey = this.snakeCase 
+                        ? this.dashedCaseToSnakeCase(key) 
+                        : this.dashedCaseToCamelCase(key);
+                    tmpKey = tmpKey.replace(/^\./, "");
                     tmpItem[tmpKey] = tmpVal;
                     if (tmpVal === "true" || tmpVal === "false") {
                         tmpItem[tmpKey] = tmpVal === "true";

@@ -4,8 +4,8 @@ import { RosApiCollection } from "./RosApiCollection";
 
 export class RosApiOperations extends RouterOSAPICrud {
 
-    constructor(rosApi: RouterOSAPI, path: string) {
-        super(rosApi, path);
+    constructor(rosApi: RouterOSAPI, path: string, snakeCase: boolean) {
+        super(rosApi, path, snakeCase);
     }
 
     public select(fields: string | string[]): RosApiOperations {
@@ -19,17 +19,7 @@ export class RosApiOperations extends RouterOSAPICrud {
 
         // Convert array to a string comma separated 
         commaFields += fields;
-
-        // Clean any empty space left
-        commaFields = commaFields.replace(/ /g, "");
-
-        // Convert camelCase to dashed
-        commaFields = commaFields.replace(/([a-z][A-Z])/g, (g, w) => {
-            return g[0] + "-" + g[1].toLowerCase(); 
-        });
-
-        // Replace any underline to hiphen if used
-        this.proplistVal = commaFields.replace(/_/g, "-");
+        this.proplistVal = commaFields;
         return this;
     }
 
@@ -73,34 +63,61 @@ export class RosApiOperations extends RouterOSAPICrud {
         return this;
     }
 
-    public orWhere(key: string, value: string): RosApiOperations {
+    public orWhere(key: object | string, value?: string): RosApiOperations {
         this.where(key, value);
         this.queryVal.push("?#|");
         return this;
     }
 
-    public orWhereNot(key: string, value: string): RosApiOperations {
+    public orWhereNot(key: object | string, value?: string): RosApiOperations {
         this.where(key, value);
         this.queryVal.push("?#!", "?#|");
         return this;
     }
 
-    public andWhere(key: string, value: string): RosApiOperations {
+    public andWhere(key: object | string, value?: string): RosApiOperations {
         this.where(key, value);
         this.queryVal.push("?#&");
         return this;
     }
 
-    public andWhereNot(key: string, value: string): RosApiOperations {
+    public andWhereNot(key: object | string, value?: string): RosApiOperations {
         this.where(key, value);
         this.queryVal.push("?#!", "?#&");
         return this;
     }
 
-    public whereNot(key: string, value: string): RosApiOperations {
+    public whereNot(key: object | string, value?: string): RosApiOperations {
         this.where(key, value);
         this.queryVal.push("?#!");
         return this;
+    }
+
+    public whereHigher(key: object | string, value?: string): RosApiOperations {
+        this.where(">" + key, value);
+        return this;
+    }
+
+    public whereLower(key: object | string, value?: string): RosApiOperations {
+        this.where(">" + key, value);
+        return this;
+    }
+
+    public whereExists(key: string): RosApiOperations {
+        return this.whereHigher(key);
+    }
+
+    public whereNotEmpty(key: string): RosApiOperations {
+        return this.whereHigher(key);
+    }
+
+    public whereEmpty(key: string): RosApiOperations {
+        this.where("-" + key);
+        return this;
+    }
+
+    public whereNotExists(key: string): RosApiOperations {
+        return this.whereEmpty(key);
     }
 
     public get(data?: object): Promise<object[]> {
@@ -116,7 +133,7 @@ export class RosApiOperations extends RouterOSAPICrud {
     public getCollection(data?: object): Promise<object[]> {
         return this.get(data).then((results) => {
             for (let i = 0; i < results.length; i++) {
-                results[i] = new RosApiCollection(this.rosApi, this.pathVal, results[i]);
+                results[i] = new RosApiCollection(this.rosApi, this.pathVal, results[i], this.snakeCase);
             }
             return Promise.resolve(results);
         }).catch((err: RosException) => {
