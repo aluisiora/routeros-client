@@ -8,6 +8,7 @@
     "test": "test"
   },
   "scripts": {
+    "prepublish": "tsc -p ./src",
     "test": "mocha"
   },
   "repository": {
@@ -38,12 +39,13 @@
     "@types/debug": "0.0.30",
     "mocha": "^4.0.1",
     "should": "^13.1.0",
+    "source-map-support": "^0.5.0",
     "tslint": "^5.7.0",
     "typescript": "^2.5.3"
   },
   "dependencies": {
     "@types/node": "^6.0.90",
     "debug": "^3.1.0",
-    "node-routeros": "^1.0.3"
+    "node-routeros": "^1.0.4"
   }
 }
