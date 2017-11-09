@@ -182,7 +182,9 @@ export abstract class RouterOSAPICrud {
     private treatMikrotikProperties(results: object[]): object[] {
         const treatedArr: object[] = [];
         results.forEach((result) => {
-            const tmpItem = new Object();
+            const tmpItem = {
+                $$path : this.pathVal
+            };
             for (const key in result) {
                 if (result.hasOwnProperty(key)) {
                     const tmpVal = result[key];

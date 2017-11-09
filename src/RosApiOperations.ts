@@ -133,7 +133,7 @@ export class RosApiOperations extends RouterOSAPICrud {
     public getCollection(data?: object): Promise<object[]> {
         return this.get(data).then((results) => {
             for (let i = 0; i < results.length; i++) {
-                results[i] = new RosApiCollection(this.rosApi, this.pathVal, results[i], this.snakeCase);
+                results[i] = new RosApiCollection(this.rosApi, results[i], this.snakeCase);
             }
             return Promise.resolve(results);
         }).catch((err: RosException) => {
