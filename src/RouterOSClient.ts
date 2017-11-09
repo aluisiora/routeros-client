@@ -1,30 +1,42 @@
-import { RouterOSAPI, IRosOptions } from "node-routeros";
-import { RosAPI } from "./api/RosApi";
+import { RouterOSAPI, IRosOptions, RosException } from "node-routeros";
+import { IRosSocket } from "./IRosSocket";
+import { RosApiMenu } from "./RosApiMenu";
 
-export class RouterOSClient {
+export class RouterOSClient implements IRosSocket {
 
     private options: IRosOptions;
 
-    private apiObj: RosAPI;
+    private api: RouterOSAPI;
 
     constructor(options: IRosOptions) {
         this.options = options;
-        this.apiObj = new RosAPI(new RouterOSAPI(this.options));
+        this.api = new RouterOSAPI(this.options);
     }
 
-    public api(): RosAPI {
-        return this.apiObj;
+    public connect(): Promise<RosApiMenu> {
+        const apiMenu = this.apiMenu();
+        if (this.api.connected) return Promise.resolve(apiMenu);
+        return this.api.connect().then(() => {
+            return Promise.resolve(apiMenu);
+        }).catch((err: Error) => {
+            return Promise.reject(err);
+        });
     }
 
-    public ssh(): void {
-        return;
+    public apiMenu(): RosApiMenu {
+        return new RosApiMenu(this.api);
     }
 
-    public snmp(): void {
-        return;
+    public disconnect(): Promise<RouterOSAPI> {
+        return this.api.close();
     }
 
-    public web(): void {
-        return;
+    public close(): Promise<RouterOSAPI> {
+        return this.disconnect();
     }
+
+    public end(): Promise<RouterOSAPI> {
+        return this.disconnect();
+    }
+
 }
