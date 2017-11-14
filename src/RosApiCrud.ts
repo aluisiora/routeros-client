@@ -101,10 +101,6 @@ export abstract class RouterOSAPICrud {
         }
         if (this.proplistVal) val.push(this.proplistVal);
         val = val.concat(this.queryVal).slice();
-        for (let i = 0; i < val.length; i++) {
-            val[i] = this.camelCaseOrSnakeCaseToDashedCase(val[i]);
-            if (convertToQuote) val[i] = val[i].replace(/^=/, "?");
-        }
         return val;
     }    
 
@@ -112,7 +108,7 @@ export abstract class RouterOSAPICrud {
      * Make the query array to write on the API
      * @param searchParameters The key-value pair to add to the search
      */
-    protected makeQuery(searchParameters: object): string[] {
+    protected makeQuery(searchParameters: object, addQuote: boolean = false): string[] {
         let tmpKey: string;
         let tmpVal: string | number | boolean | null;
 
@@ -142,9 +138,13 @@ export abstract class RouterOSAPICrud {
                         break;
                 }
 
-                // tmpKey = (addQuote ? "?" : "=") + tmpKey;
+                if (tmpVal === null) tmpVal = "";
 
-                this.queryVal.push("=" + tmpKey + "=" + tmpVal);
+                tmpKey = (addQuote ? "?" : "=") + tmpKey;
+
+                tmpKey = this.camelCaseOrSnakeCaseToDashedCase(tmpKey);
+
+                this.queryVal.push(tmpKey + "=" + tmpVal);
             }
         }
 
@@ -154,6 +154,7 @@ export abstract class RouterOSAPICrud {
     protected write(query: string[]): Types.SocPromise {
         this.queryVal = [];
         this.proplistVal = "";
+        console.log(query);
         return this.rosApi.write(query).then((results) => {
             return Promise.resolve(this.treatMikrotikProperties(results));
         }).catch((err: RosException) => {

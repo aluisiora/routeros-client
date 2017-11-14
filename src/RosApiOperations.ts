@@ -1,6 +1,7 @@
 import { RouterOSAPI, RosException, Stream } from "node-routeros";
 import { RouterOSAPICrud } from "./RosApiCrud";
 import { RosApiCollection } from "./RosApiCollection";
+import { SocPromise } from "./Types";
 
 export class RosApiOperations extends RouterOSAPICrud {
 
@@ -32,6 +33,20 @@ export class RosApiOperations extends RouterOSAPICrud {
     }
 
     /**
+     * Add an option to the command. As an example: count-only or detail
+     * 
+     * @param opts an option or array of options
+     * @param args multiple strings of parameters of options
+     */
+    public options(opts: string | string[], ...args: string[]): RosApiOperations {
+        if (typeof opts === "string") opts = [opts];
+        opts = opts.concat(args || []);
+        const optObj = {};
+        for (const opt of opts) optObj[opt] = "";
+        return this.where(optObj, "", false);
+    }
+
+    /**
      * Alias for select()
      * @param fields 
      */
@@ -39,14 +54,14 @@ export class RosApiOperations extends RouterOSAPICrud {
         return this.select(fields);
     }
 
-    public where(key: object | string, value: string = ""): RosApiOperations {
+    public where(key: object | string, value: string = "", addQuote: boolean = true): RosApiOperations {
         let search: object = new Object();
         if (typeof key === "string") {
             search[key] = value;
         } else {
             search = key;
         }
-        this.makeQuery(search);
+        this.makeQuery(search, addQuote);
         return this;
     }
 
@@ -120,17 +135,17 @@ export class RosApiOperations extends RouterOSAPICrud {
         return this.whereEmpty(key);
     }
 
-    public get(data?: object): Promise<object[]> {
+    public get(data?: object): SocPromise {
         if (data) this.makeQuery(data);
         const query = this.fullQuery("/print", true);
         return this.write(query);
     }
 
-    public getAll(data?: object): Promise<object[]> {
+    public getAll(data?: object): SocPromise {
         return this.get(data);
     }
 
-    public getCollection(data?: object): Promise<object[]> {
+    public getCollection(data?: object): SocPromise {
         return this.get(data).then((results) => {
             for (let i = 0; i < results.length; i++) {
                 results[i] = new RosApiCollection(this.rosApi, results[i], this.snakeCase);
@@ -141,8 +156,12 @@ export class RosApiOperations extends RouterOSAPICrud {
         });
     }
 
-    public print(data?: object): Promise<object[]> {
+    public print(data?: object): SocPromise {
         return this.get(data);
+    }
+
+    public first(data?: object): Promise<object> {
+        return this.find(data);
     }
 
     public find(data?: object): Promise<object> {
@@ -184,8 +203,12 @@ export class RosApiOperations extends RouterOSAPICrud {
         });
     }
 
-    public stream(callback?: () => void): Stream {
-        const query = this.fullQuery();
+    public stream(action: any, callback?: () => void): Stream {
+        if (typeof action === "function") {
+            callback = action;
+            action = "";
+        }
+        const query = this.fullQuery(action);
         return this.rosApi.stream(query, callback);
     }
     

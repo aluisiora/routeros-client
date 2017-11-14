@@ -9,7 +9,7 @@
   },
   "scripts": {
     "prepublish": "tsc -p ./src",
-    "test": "mocha"
+    "test": "ENV=testing mocha"
   },
   "repository": {
     "type": "git",
@@ -36,16 +36,19 @@
   },
   "homepage": "https://github.com/aluisiora/routeros-client#readme",
   "devDependencies": {
+    "@types/chai": "^4.0.4",
     "@types/debug": "0.0.30",
+    "@types/mocha": "^2.2.44",
+    "chai": "^4.1.2",
     "mocha": "^4.0.1",
-    "should": "^13.1.0",
     "source-map-support": "^0.5.0",
+    "ts-node": "^3.3.0",
     "tslint": "^5.7.0",
     "typescript": "^2.5.3"
   },
   "dependencies": {
     "@types/node": "^6.0.90",
     "debug": "^3.1.0",
-    "node-routeros": "^1.0.4"
+    "node-routeros": "^1.0.6"
   }
 }
