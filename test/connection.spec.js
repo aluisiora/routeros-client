@@ -1,6 +1,5 @@
-var RouterOSClient = require("../dist").RouterOSClient;
-var chai = require("chai");
-require("mocha");
+const RouterOSClient = require("../dist").RouterOSClient;
+const chai = require("chai");
 
 const should = chai.should();
 
@@ -22,7 +21,6 @@ describe("RouterOSClient", () => {
                 conn.close();
                 done();
             }).catch((err) => {
-                should.not.exist(err);
                 done(err);
             });
         });
@@ -39,7 +37,6 @@ describe("RouterOSClient", () => {
                 conn.close();
                 done();
             }).catch((err) => {
-                should.exist(err);
                 done();
             });
 

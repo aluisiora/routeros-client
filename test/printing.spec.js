@@ -1,6 +1,5 @@
-var RouterOSClient = require("../dist").RouterOSClient;
-var chai = require("chai");
-require("mocha");
+const RouterOSClient = require("../dist").RouterOSClient;
+const chai = require("chai");
 
 const should = chai.should();
 const expect = chai.expect;
@@ -21,7 +20,6 @@ describe("RosApiOperations", () => {
             api = connApi;
             done();
         }).catch((err) => {
-            should.not.exist(err);
             done(err);
         });
     });
@@ -33,7 +31,6 @@ describe("RosApiOperations", () => {
                 interfaces.length.should.be.above(0);
                 done();
             }).catch((err) => {
-                should.not.exist(err);
                 done(err);
             });
         });
@@ -46,7 +43,6 @@ describe("RosApiOperations", () => {
                 interf.should.not.have.a.property("type");
                 done();
             }).catch((err) => {
-                should.not.exist(err);
                 done(err);
             });
 
@@ -58,7 +54,6 @@ describe("RosApiOperations", () => {
                 expect(count[0].ret).to.match(/^\d+$/);
                 done();
             }).catch((err) => {
-                should.not.exist(err);
                 done(err);
             });
         });
@@ -69,7 +64,6 @@ describe("RosApiOperations", () => {
                 expect(count[0].name).to.be.equal("ether1");
                 done();
             }).catch((err) => {
-                should.not.exist(err);
                 done(err);
             });
         });
@@ -83,7 +77,6 @@ describe("RosApiOperations", () => {
                 expect(count[0].ret).to.be.equal(1);
                 done();
             }).catch((err) => {
-                should.not.exist(err);
                 done(err);
             });
         });
@@ -99,7 +92,6 @@ describe("RosApiOperations", () => {
                 }
                 done();
             }).catch((err) => {
-                should.not.exist(err);
                 done(err);
             });
         });
@@ -116,7 +108,6 @@ describe("RosApiOperations", () => {
                 }
                 done();
             }).catch((err) => {
-                should.not.exist(err);
                 done(err);
             });
         });
@@ -132,7 +123,6 @@ describe("RosApiOperations", () => {
                 }
                 done();
             }).catch((err) => {
-                should.not.exist(err);
                 done(err);
             });
         });
@@ -151,7 +141,6 @@ describe("RosApiOperations", () => {
                 expect(interfac).to.have.property("unset");
                 done();
             }).catch((err) => {
-                should.not.exist(err);
                 done(err);
             });
         });
@@ -162,7 +151,6 @@ describe("RosApiOperations", () => {
         conn.close().then(() => {
             done();
         }).catch((err) => {
-            should.not.exist(err);
             done(err);
         });
     });
