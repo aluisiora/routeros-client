@@ -77,7 +77,7 @@ export abstract class RouterOSAPICrud {
         this.queryVal = [];
         properties.forEach((property) => {
             this.queryVal = curQueryVal.slice();
-            this.queryVal.push("=value-name=" + property);
+            this.queryVal.push("=value-name=" + this.camelCaseOrSnakeCaseToDashedCase(property));
             $q.push(this.exec("unset"));
         });
         return Promise.all($q);
@@ -92,7 +92,7 @@ export abstract class RouterOSAPICrud {
         return this.update(data, ids);
     }
 
-    protected fullQuery(append?: string, convertToQuote: boolean = false): string[] {
+    protected fullQuery(append?: string): string[] {
         let val = [];
         if (append) {
             val.push(this.pathVal + append);
@@ -101,6 +101,13 @@ export abstract class RouterOSAPICrud {
         }
         if (this.proplistVal) val.push(this.proplistVal);
         val = val.concat(this.queryVal).slice();
+
+        if (!/(print|getall)$/.test(val[0])) {
+            for (let index = 0; index < val.length; index++) {
+                val[index] = val[index].replace(/^\?/, "=");
+            }
+        }
+
         return val;
     }    
 

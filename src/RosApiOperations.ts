@@ -137,7 +137,7 @@ export class RosApiOperations extends RouterOSAPICrud {
 
     public get(data?: object): SocPromise {
         if (data) this.makeQuery(data);
-        const query = this.fullQuery("/print", true);
+        const query = this.fullQuery("/print");
         return this.write(query);
     }
 
