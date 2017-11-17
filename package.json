@@ -8,7 +8,7 @@
     "test": "test"
   },
   "scripts": {
-    "prepublish": "tsc -p ./src",
+    "prepublishOnly": "tsc -p ./src",
     "test": "ENV=testing mocha"
   },
   "repository": {
