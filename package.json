@@ -36,7 +36,7 @@
   },
   "homepage": "https://github.com/aluisiora/routeros-client#readme",
   "devDependencies": {
-    "@types/chai": "^4.0.4",
+    "@types/chai": "^4.0.5",
     "@types/debug": "0.0.30",
     "@types/mocha": "^2.2.44",
     "chai": "^4.1.2",
@@ -47,8 +47,8 @@
     "typescript": "^2.5.3"
   },
   "dependencies": {
-    "@types/node": "^6.0.90",
+    "@types/node": "^6.0.92",
     "debug": "^3.1.0",
-    "node-routeros": "^1.0.6"
+    "node-routeros": "^1.0.8"
   }
 }
