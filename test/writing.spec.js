@@ -1,12 +1,18 @@
 const RouterOSClient = require("../dist").RouterOSClient;
 const chai = require("chai");
-// require("mocha");
 
 const should = chai.should();
 const expect = chai.expect;
 
 const address = "10.62.0.25";
-let conn, api, item;
+
+let conn,
+    api,
+    menu,
+    item,
+    firstRule,
+    secondRule,
+    thirdRule;
 
 describe("RouterOSAPICrud", () => {
 
@@ -29,7 +35,7 @@ describe("RouterOSAPICrud", () => {
 
         it("should add three firewall filter rules on chain forward", (done) => {
 
-            let menu = api.menu("/ip firewall filter");
+            menu = api.menu("/ip firewall filter");
             menu.add({
                 chain: "forward",
                 protocol: "tcp",
@@ -37,6 +43,7 @@ describe("RouterOSAPICrud", () => {
                 comment: "first rule"
             }).then((response) => {
                 response.should.have.property("ret").and.match(/^\*/);
+                firstRule = response.ret;
                 return menu.add({
                     chain: "forward",
                     protocol: "udp",
@@ -46,6 +53,7 @@ describe("RouterOSAPICrud", () => {
                 });
             }).then((response) => {
                 response.should.have.property("ret").and.match(/^\*/);
+                secondRule = response.ret;
                 return menu.add({
                     chain: "forward",
                     protocol: "udp",
@@ -55,6 +63,7 @@ describe("RouterOSAPICrud", () => {
                 });
             }).then((response) => {
                 response.should.have.property("ret").and.match(/^\*/);
+                thirdRule = response.ret;
                 done();
             }).catch((err) => {
                 done(err);
@@ -63,11 +72,7 @@ describe("RouterOSAPICrud", () => {
         });
 
         it("should update the first rule", (done) => {
-            let menu = api.menu("/ip firewall filter");
-            menu.select("id").where({ comment: "first rule" }).first().then((response) => {
-                response.should.have.property("id").and.match(/^\*/);
-                return menu.where("id", response.id).update({ disabled: true });
-            }).then((response) => {
+            menu.where("id", firstRule).update({ disabled: true }).then((response) => {
                 response.length.should.be.equal(0);
                 done();
             }).catch((err) => {
@@ -76,11 +81,7 @@ describe("RouterOSAPICrud", () => {
         });
 
         it("should unset the protocol value of the second filter rule", (done) => {
-            let menu = api.menu("/ip firewall filter");
-            menu.select("id").where({ comment: "second rule" }).first().then((response) => {
-                response.should.have.property("id").and.match(/^\*/);
-                return menu.unset("protocol", response.id);
-            }).then((response) => {
+            menu.unset("protocol", secondRule).then((response) => {
                 response.length.should.be.equal(1);
                 done();
             }).catch((err) => {
@@ -89,17 +90,7 @@ describe("RouterOSAPICrud", () => {
         });
 
         it("should move the second rule above first rule", (done) => {
-            let menu = api.menu("/ip firewall filter");
-            let firstRule, secondRule;
-            menu.select("id").where({ comment: "first rule" }).first().then((response) => {
-                response.should.have.property("id").and.match(/^\*/);
-                firstRule = response.id;
-                return menu.select("id").where({ comment: "second rule" }).first();
-            }).then((response) => {
-                response.should.have.property("id").and.match(/^\*/);
-                secondRule = response.id;
-                return menu.move(secondRule, firstRule);
-            }).then((response) => {
+            menu.move(secondRule, firstRule).then((response) => {
                 response.length.should.be.equal(0);
                 done();
             }).catch((err) => {
@@ -108,8 +99,7 @@ describe("RouterOSAPICrud", () => {
         });
 
         it("should create a collection from the third rule", (done) => {
-            let menu = api.menu("/ip firewall filter");
-            menu.select("id").where({ comment: "third rule" }).first().then((filterRule) => {
+            menu.where({ id: thirdRule }).first().then((filterRule) => {
                 filterRule.should.have.property("id").and.match(/^\*/);
 
                 expect(filterRule).to.not.have.property("update");
@@ -147,40 +137,38 @@ describe("RouterOSAPICrud", () => {
             });
         });
 
-        it("should move the third rule above the second rule", () => {
-            let menu = api.menu("/ip firewall filter");
-            let secondRule;
-            menu.select("id").where({ comment: "second rule" }).first().then((response) => {
-                response.should.have.property("id").and.match(/^\*/);
-                secondRule = response.id;
-                return item.move(secondRule);
-            }).then((response) => {
-                item.nextid.should.be.equal(secondRule);
+        it("should move the third rule above the first rule", (done) => {
+            item.move(firstRule).then((response) => {
                 done();
             }).catch((err) => {
                 done(err);
             });
         });
 
-        it("should remove the third rule");
+        it("should remove the third rule", (done) => {
+            item.remove().then(() => {
+                done();
+            }).catch((err) => {
+                done(err);
+            });
+        });
 
-        // it("should delete the added filter rules", (done) => {
-        //     let menu = api.menu("/ip firewall filter");
-        //     menu.only("id").where({ comment: "first rule" }).orWhere({ comment: "second rule" }).get().then((response) => {
-        //         response.length.should.be.equal(2);
-        //         return menu.remove([
-        //             response[0].id,
-        //             response[1].id
-        //         ]);
-        //     }).then((response) => {
-        //         response.length.should.be.equal(0);
-        //         done();
-        //     }).catch((err) => {
-        //         done(err);
-        //     });
-        // });
+        it("should delete the added filter rules", (done) => {
+            menu.only("id").where({ comment: "first rule" }).orWhere({ comment: "second rule" }).get().then((response) => {
+                response.length.should.be.equal(2);
+                return menu.remove([
+                    response[0].id,
+                    response[1].id
+                ]);
+            }).then((response) => {
+                response.length.should.be.equal(0);
+                done();
+            }).catch((err) => {
+                done(err);
+            });
+        });
 
-    });    
+    });
 
     after("should disconnect", (done) => {
         conn.close().then(() => {
