@@ -57,11 +57,7 @@ export class RosApiCollection extends RouterOSAPICrud {
     }
 
     public remove(): Types.SocPromise {
-        return this.exec("remove").then(() => {
-            return this.refreshData();
-        }).catch((err: RosException) => {
-            return Promise.reject(err);
-        });
+        return super.remove(this.originalItem.id);
     }
 
     public set(data: object): Types.SocPromise {

@@ -161,7 +161,6 @@ export abstract class RouterOSAPICrud {
     protected write(query: string[]): Types.SocPromise {
         this.queryVal = [];
         this.proplistVal = "";
-        console.log(query);
         return this.rosApi.write(query).then((results) => {
             return Promise.resolve(this.treatMikrotikProperties(results));
         }).catch((err: RosException) => {
