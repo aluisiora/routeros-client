@@ -1,5 +1,5 @@
 # RouterOS Client
-This is a client wrapper for node-routeros api for doing common tasks and making the api easier to use for small and large NodeJS projects.
+This is a client wrapper for [node-routeros](https://github.com/aluisiora/node-routeros) api for doing common tasks and making the api easier to use for small and large NodeJS projects.
 
 ## Getting Started
 These instructions will help you install and use some of the client features, you can get a complete documentation in the [wiki](https://github.com/aluisiora/routeros-client/wiki).
@@ -191,7 +191,7 @@ Note that, if are cloning this repo, you must be familiar with [Typescript](http
 ## Running the tests
 There aren't that many tests, but in order to run them, I used [RouterOS CHR](https://mikrotik.com/download) (look for the Cloud Hosted Router if you aren't familiar with it yet) on a virtual machine with 4 interfaces, where the first interface is a bridge of my network card:
 
-image here
+![VirtualBox RouterOS CHR Conf](https://raw.githubusercontent.com/aluisiora/routeros-client/master/images/routeros-chr-interfaces.gif)
 
 Also, the vm gets the 10.62.0.25 ip address, you might want to change that in the test files according to network.
 The user and password was set to admin and admin respectively.
