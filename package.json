@@ -9,7 +9,9 @@
   },
   "scripts": {
     "prepublishOnly": "tsc -p ./src",
-    "test": "ENV=testing mocha"
+    "test": "ENV=testing mocha",
+    "build": "tsc -p ./src",
+    "build:watch": "tsc -w -p ./src"
   },
   "repository": {
     "type": "git",
