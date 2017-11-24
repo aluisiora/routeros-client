@@ -317,7 +317,7 @@ export abstract class RouterOSAPICrud {
                     tmpItem[tmpKey] = tmpVal;
                     if (tmpVal === "true" || tmpVal === "false") {
                         tmpItem[tmpKey] = tmpVal === "true";
-                    } else if (/^\d+$/.test(tmpVal)) {
+                    } else if (/^\d+(\.\d+)?$/.test(tmpVal)) {
                         tmpItem[tmpKey] = parseFloat(tmpVal);
                     }
                 }
