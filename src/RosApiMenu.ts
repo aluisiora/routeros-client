@@ -1,5 +1,5 @@
 import { RouterOSAPI } from "node-routeros";
-import { RosApiOperations } from "./RosApiOperations";
+import { RosApiCommands } from "./RosApiCommands";
 import { RosApiCollection } from "./RosApiCollection";
 
 export class RosApiMenu {
@@ -30,8 +30,8 @@ export class RosApiMenu {
      * 
      * @param path The menu you want to do actions
      */
-    public menu(path: string): RosApiOperations {
-        return new RosApiOperations(this.rosApi, path, this.snakeCase);
+    public menu(path: string): RosApiCommands {
+        return new RosApiCommands(this.rosApi, path, this.snakeCase);
     }
     
     /**

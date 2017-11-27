@@ -3,7 +3,7 @@ import { RouterOSAPICrud } from "./RosApiCrud";
 import { RosApiCollection } from "./RosApiCollection";
 import { SocPromise } from "./Types";
 
-export class RosApiOperations extends RouterOSAPICrud {
+export class RosApiCommands extends RouterOSAPICrud {
 
     /**
      * Creates a set of operations to do over a menu
@@ -21,7 +21,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * 
      * @param fields Fields to return
      */
-    public select(fields: string | string[]): RosApiOperations {
+    public select(fields: string | string[]): RosApiCommands {
         let commaFields: string = "=.proplist=";
         if (typeof fields === "string") fields = [fields];
         
@@ -40,7 +40,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * Alias for select()
      * @param fields Fields to return
      */
-    public only(fields: string | string[]): RosApiOperations {
+    public only(fields: string | string[]): RosApiCommands {
         return this.select(fields);
     }
 
@@ -50,7 +50,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * @param opts an option or array of options
      * @param args multiple strings of parameters of options
      */
-    public options(opts: string | string[], ...args: string[]): RosApiOperations {
+    public options(opts: string | string[], ...args: string[]): RosApiCommands {
         if (typeof opts === "string") opts = [opts];
         opts = opts.concat(args || []);
         const optObj = {};
@@ -62,7 +62,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * Alias for select()
      * @param fields 
      */
-    public proplist(fields: string | string[]): RosApiOperations {
+    public proplist(fields: string | string[]): RosApiCommands {
         return this.select(fields);
     }
 
@@ -74,7 +74,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * @param value the value if a string key is passed
      * @param addQuestionMark if will start the sentence with a question mark (?), else, starts with equal (=)
      */
-    public where(key: object | string, value: string = "", addQuestionMark: boolean = true): RosApiOperations {
+    public where(key: object | string, value: string = "", addQuestionMark: boolean = true): RosApiCommands {
         let search: object = new Object();
         if (typeof key === "string") {
             search[key] = value;
@@ -91,7 +91,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * @param key a key to a value or an object with keys and values to filter
      * @param value the value if a string key is passed
      */
-    public query(key: object | string, value?: string): RosApiOperations {
+    public query(key: object | string, value?: string): RosApiCommands {
         return this.where(key, value);
     }
 
@@ -101,7 +101,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * @param key a key to a value or an object with keys and values to filter
      * @param value the value if a string key is passed
      */
-    public filter(key: object | string, value?: string): RosApiOperations {
+    public filter(key: object | string, value?: string): RosApiCommands {
         return this.where(key, value);
     }
 
@@ -110,7 +110,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * 
      * @param search array of sentences to send over the api
      */
-    public whereRaw(search: string[]): RosApiOperations {
+    public whereRaw(search: string[]): RosApiCommands {
         this.queryVal = this.queryVal.concat(search);
         return this;
     }
@@ -121,7 +121,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * @param key a key to a value or an object with keys and values to filter
      * @param value the value if a string key is passed
      */
-    public orWhere(key: object | string, value?: string): RosApiOperations {
+    public orWhere(key: object | string, value?: string): RosApiCommands {
         this.where(key, value);
         this.queryVal.push("?#|");
         return this;
@@ -133,7 +133,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * @param key a key to a value or an object with keys and values to filter
      * @param value the value if a string key is passed
      */
-    public orWhereNot(key: object | string, value?: string): RosApiOperations {
+    public orWhereNot(key: object | string, value?: string): RosApiCommands {
         this.where(key, value);
         this.queryVal.push("?#!", "?#|");
         return this;
@@ -145,7 +145,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * @param key a key to a value or an object with keys and values to filter
      * @param value the value if a string key is passed
      */
-    public andWhere(key: object | string, value?: string): RosApiOperations {
+    public andWhere(key: object | string, value?: string): RosApiCommands {
         this.where(key, value);
         this.queryVal.push("?#&");
         return this;
@@ -157,7 +157,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * @param key a key to a value or an object with keys and values to filter
      * @param value the value if a string key is passed
      */
-    public andWhereNot(key: object | string, value?: string): RosApiOperations {
+    public andWhereNot(key: object | string, value?: string): RosApiCommands {
         this.where(key, value);
         this.queryVal.push("?#!", "?#&");
         return this;
@@ -169,7 +169,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * @param key a key to a value or an object with keys and values to filter
      * @param value the value if a string key is passed
      */
-    public whereNot(key: object | string, value?: string): RosApiOperations {
+    public whereNot(key: object | string, value?: string): RosApiCommands {
         this.where(key, value);
         this.queryVal.push("?#!");
         return this;
@@ -181,7 +181,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * @param key a key to a value or an object with keys and values to filter
      * @param value the value if a string key is passed
      */
-    public whereHigher(key: object | string, value?: string): RosApiOperations {
+    public whereHigher(key: object | string, value?: string): RosApiCommands {
         this.where(">" + key, value);
         return this;
     }
@@ -192,7 +192,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * @param key a key to a value or an object with keys and values to filter
      * @param value the value if a string key is passed
      */
-    public whereLower(key: object | string, value?: string): RosApiOperations {
+    public whereLower(key: object | string, value?: string): RosApiCommands {
         this.where("<" + key, value);
         return this;
     }
@@ -202,7 +202,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * 
      * @param key the parameter to check
      */
-    public whereExists(key: string): RosApiOperations {
+    public whereExists(key: string): RosApiCommands {
         return this.whereHigher(key);
     }
 
@@ -211,7 +211,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * 
      * @param key the parameter to check
      */
-    public whereNotEmpty(key: string): RosApiOperations {
+    public whereNotEmpty(key: string): RosApiCommands {
         return this.whereHigher(key);
     }
 
@@ -220,7 +220,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * 
      * @param key the parameter to check
      */
-    public whereEmpty(key: string): RosApiOperations {
+    public whereEmpty(key: string): RosApiCommands {
         this.where("-" + key);
         return this;
     }
@@ -230,7 +230,7 @@ export class RosApiOperations extends RouterOSAPICrud {
      * 
      * @param key the parameter to check
      */
-    public whereNotExists(key: string): RosApiOperations {
+    public whereNotExists(key: string): RosApiCommands {
         return this.whereEmpty(key);
     }
 
@@ -329,10 +329,9 @@ export class RosApiOperations extends RouterOSAPICrud {
         return this.write([
             this.pathVal + "/print",
             "=.proplist=.id"
-        ]).then((results) => {
-            const ids = [];
-            results.forEach((result) => {
-                ids.push(result[".id"]);
+        ]).then((results: object[]) => {
+            const ids = results.map((result) => {
+                return result[".id"];
             });
             return this.write([
                 this.pathVal + "/remove",

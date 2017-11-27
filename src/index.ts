@@ -5,5 +5,5 @@ export * from "./RouterOSClient";
 export * from "./RosApiCollection";
 export * from "./RosApiCrud";
 export * from "./RosApiMenu";
-export * from "./RosApiOperations";
+export * from "./RosApiCommands";
 export * from "./Types";
