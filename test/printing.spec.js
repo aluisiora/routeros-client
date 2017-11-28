@@ -112,8 +112,8 @@ describe("RosApiCommands", () => {
             });
         });
 
-        it("should return a collection of interfaces from /interface", (done) => {
-            api.menu("/interface").getCollection()
+        it("should return a model of interfaces from /interface", (done) => {
+            api.menu("/interface").getModel()
             .then((interfaces) => {
                 expect(interfaces.length).to.be.above(0);
                 for (const interf of interfaces) {
@@ -127,14 +127,14 @@ describe("RosApiCommands", () => {
             });
         });
 
-        it("should create a collection from ether1", (done) => {
+        it("should create a model from ether1", (done) => {
             api.menu("/interface").where("name", "ether1").find()
             .then((interfac) => {
                 expect(interfac).to.not.have.property("update");
                 expect(interfac).to.not.have.property("delete");
                 expect(interfac).to.not.have.property("unset");
                 
-                interfac = api.collect(interfac);
+                interfac = api.model(interfac);
 
                 expect(interfac).to.have.property("update");
                 expect(interfac).to.have.property("delete");

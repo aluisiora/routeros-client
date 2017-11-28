@@ -1,6 +1,6 @@
 import { RouterOSAPI, RosException, Stream } from "node-routeros";
 import { RouterOSAPICrud } from "./RosApiCrud";
-import { RosApiCollection } from "./RosApiCollection";
+import { RosApiModel } from "./RosApiModel";
 import { SocPromise } from "./Types";
 
 export class RosApiCommands extends RouterOSAPICrud {
@@ -255,15 +255,15 @@ export class RosApiCommands extends RouterOSAPICrud {
     }
 
     /**
-     * Alias of get, but in the process creates a collection
+     * Alias of get, but in the process creates a model
      * of each item returned
      * 
      * @param data optional filtering, like what you get when using the where function
      */
-    public getCollection(data?: object): SocPromise {
+    public getModel(data?: object): SocPromise {
         return this.get(data).then((results) => {
             for (let i = 0; i < results.length; i++) {
-                results[i] = new RosApiCollection(this.rosApi, results[i], this.snakeCase);
+                results[i] = new RosApiModel(this.rosApi, results[i], this.snakeCase);
             }
             return Promise.resolve(results);
         }).catch((err: RosException) => {

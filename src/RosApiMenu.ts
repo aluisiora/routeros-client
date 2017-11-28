@@ -1,6 +1,6 @@
 import { RouterOSAPI } from "node-routeros";
 import { RosApiCommands } from "./RosApiCommands";
-import { RosApiCollection } from "./RosApiCollection";
+import { RosApiModel } from "./RosApiModel";
 
 export class RosApiMenu {
 
@@ -16,7 +16,7 @@ export class RosApiMenu {
 
     /**
      * Creates a handler for the menus
-     * and creates collections
+     * and creates Models
      * 
      * @param rosApi The raw api
      */
@@ -43,19 +43,19 @@ export class RosApiMenu {
     }
 
     /**
-     * Creates a collection of pre-made actions to do
+     * Creates a model of pre-made actions to do
      * with an item from any menu that has lists
      * 
      * @param item The item of a menu (Ex: a single firewall rule, or an IP address)
      */
-    public collect(item: any): RosApiCollection | RosApiCollection[] {
+    public model(item: any): RosApiModel | RosApiModel[] {
         if (Array.isArray(item)) {
-            const items: RosApiCollection[] = [];
+            const items: RosApiModel[] = [];
             for (const i of item) {
-                items.push(new RosApiCollection(this.rosApi, i, this.snakeCase));
+                items.push(new RosApiModel(this.rosApi, i, this.snakeCase));
             }
             return items;
         }
-        return new RosApiCollection(this.rosApi, item, this.snakeCase);
+        return new RosApiModel(this.rosApi, item, this.snakeCase);
     }
 }

@@ -2,7 +2,7 @@ import { RouterOSAPI, RosException } from "node-routeros";
 import { RouterOSAPICrud } from "./RosApiCrud";
 import * as Types from "./Types";
 
-export class RosApiCollection extends RouterOSAPICrud {
+export class RosApiModel extends RouterOSAPICrud {
 
     /**
      * The original item before applying the properties in the object
@@ -10,11 +10,11 @@ export class RosApiCollection extends RouterOSAPICrud {
     private originalItem: any;
 
     /**
-     * Creates a collection over the item provided,
+     * Creates a model over the item provided,
      * giving options do edit, move, remove and etc
      * 
      * @param rosApi the raw api
-     * @param item the item to create a collection
+     * @param item the item to create a model
      * @param snakeCase if should turn properties to snake_case instead of camelCase
      */
     constructor(rosApi: RouterOSAPI, item: any, snakeCase: boolean) {
