@@ -1,8 +1,8 @@
 # RouterOS Client
-This is a client wrapper for [node-routeros](https://github.com/aluisiora/node-routeros) api for doing common tasks and making the api easier to use for small and large NodeJS projects.
+This is a client wrapper for [node-routeros](node-routeros) api for doing common tasks and making the api easier to use for small and large NodeJS projects.
 
 ## Getting Started
-These instructions will help you install and use some of the client features, you can get a complete documentation in the [wiki](https://github.com/aluisiora/routeros-client/wiki).
+These instructions will help you install and use some of the client features, you can get a complete documentation in the [wiki](routeros-client/wiki).
 
 ### Prerequisites
 You must be familiar with [Promises](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise), how to chain it, how to catch errors and etc.
@@ -15,13 +15,13 @@ npm install routeros-client --save
 Note: you are not required to install `node-routeros` since it's already a dependency of this lib.
 
 ## Features
-[Everything you get from the `node-routeros`](https://github.com/aluisiora/node-routeros) is still here, plus:
+[Everything you get from the `node-routeros`](node-routeros) is still here, plus:
  * You can save the menu and reuse it for multiple operations.
  * There is a "Model" feature where you can fire commands on each entry of a menu individually (check the examples).
- * Easy to read and reusable code.
+ * Easy to read and write reusable code.
 
 ## Examples
-Here are some short examples of usage, head to the [wiki](https://github.com/aluisiora/routeros-client/wiki) for a complete documentation.
+Here are some short examples of usage, head to the [wiki](routeros-client/wiki) for a complete documentation.
 ### Connecting
 ```javascript
 const RouterOSClient = require('routeros-client').RouterOSClient;
@@ -202,7 +202,7 @@ npm test
 ```
 The testing was created using [mocha](https://mochajs.org/) and [chai](http://chaijs.com/).
 # TODO
- * The wiki documentation
+ * Write more tests
 # License
 MIT License
 
