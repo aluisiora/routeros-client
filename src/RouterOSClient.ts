@@ -43,8 +43,9 @@ export class RouterOSClient {
      * 
      * @param options Connection options
      */
-    public setOptions(options: IRosOptions) {
+    public setOptions(options: IRosOptions): RouterOSClient {
         Object.assign(this.options, options);
+        return this;
     }
 
     /**
