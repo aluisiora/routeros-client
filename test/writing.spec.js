@@ -98,7 +98,7 @@ describe("RouterOSAPICrud", () => {
             });
         });
 
-        it("should create a collection from the third rule", (done) => {
+        it("should create a model from the third rule", (done) => {
             menu.where({ id: thirdRule }).first().then((filterRule) => {
                 filterRule.should.have.property("id").and.match(/^\*/);
 
@@ -106,7 +106,7 @@ describe("RouterOSAPICrud", () => {
                 expect(filterRule).to.not.have.property("delete");
                 expect(filterRule).to.not.have.property("unset");
 
-                item = api.collect(filterRule);
+                item = api.model(filterRule);
 
                 expect(item).to.have.property("update");
                 expect(item).to.have.property("delete");

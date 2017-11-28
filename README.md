@@ -17,7 +17,7 @@ Note: you are not required to install `node-routeros` since it's already a depen
 ## Features
 [Everything you get from the `node-routeros`](https://github.com/aluisiora/node-routeros) is still here, plus:
  * You can save the menu and reuse it for multiple operations.
- * There is a "collection" feature where you can do operations on each entry of a menu individually (check the examples).
+ * There is a "Model" feature where you can fire commands on each entry of a menu individually (check the examples).
  * Easy to read and reusable code.
 
 ## Examples
@@ -91,11 +91,11 @@ api.connect().then((client) => {
     // Connection error
 });
 ```
-### Using collections
+### Using the Model
 ```javascript
 api.connect().then((client) => {
 
-    client.menu("/ip proxy access").getCollection().then((results) => {
+    client.menu("/ip proxy access").getModel().then((results) => {
 
         // Suppose we want to disable acl #2 on the access list
         results[2].disable(); // this returns a Promise too
@@ -109,7 +109,7 @@ api.connect().then((client) => {
 
         // Or if we want to update acl #0
         results[0].update({
-            comment: "Updated through collection"
+            comment: "Updated through Model"
         }).then((result) => {
             // result is the updated version
         }).catch((err) => {
@@ -124,13 +124,13 @@ api.connect().then((client) => {
     // Connection error
 });
 ```
-### Creating a collection from a non-collection item
+### Creating a model from an item
 ```javascript
 api.connect().then((client) => {
 
     client.menu("/interface").where({ interface: "ether1"}).getOnly().then((result) => {
 
-        const ether1 = client.collect(result);
+        const ether1 = client.model(result);
 
         ether1.update({
             comment: "WAN"

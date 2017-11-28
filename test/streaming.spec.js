@@ -6,7 +6,7 @@ const should = chai.should();
 const address = "10.62.0.25";
 let conn, api;
 
-describe("RosApiOperations", () => {
+describe("RosApiCommands", () => {
 
     before("should stablish connection and save api object", (done) => {
         conn = new RouterOSClient({

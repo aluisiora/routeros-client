@@ -161,6 +161,16 @@ export abstract class RouterOSAPICrud {
     }
 
     /**
+     * Alias of update
+     * 
+     * @param data the new data to update the item
+     * @param ids optional id(s) of the rules
+     */
+    public edit(data: object, ids?: Types.Id): Types.SocPromise {
+        return this.update(data, ids);
+    }
+
+    /**
      * Creates the full array of sentences that will be
      * compatible with the raw API to be sent to the
      * routerboard using all the functions triggered
@@ -317,8 +327,8 @@ export abstract class RouterOSAPICrud {
                     tmpItem[tmpKey] = tmpVal;
                     if (tmpVal === "true" || tmpVal === "false") {
                         tmpItem[tmpKey] = tmpVal === "true";
-                    } else if (/^\d+$/.test(tmpVal)) {
-                        tmpItem[tmpKey] = parseInt(tmpVal, null);
+                    } else if (/^\d+(\.\d+)?$/.test(tmpVal)) {
+                        tmpItem[tmpKey] = parseFloat(tmpVal);
                     }
                 }
             }
