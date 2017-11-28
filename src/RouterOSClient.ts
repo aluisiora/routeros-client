@@ -38,6 +38,17 @@ export class RouterOSClient {
     }
 
     /**
+     * Change current connection options
+     * but it doesn't reconnect
+     * 
+     * @param options Connection options
+     */
+    public setOptions(options: IRosOptions): RouterOSClient {
+        Object.assign(this.options, options);
+        return this;
+    }
+
+    /**
      * Get an instance of the API to handle operations
      */
     public api(): RosApiMenu {
