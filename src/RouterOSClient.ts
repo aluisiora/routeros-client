@@ -25,6 +25,13 @@ export class RouterOSClient {
     }
 
     /**
+     * If it is connected or not
+     */
+    public isConnected(): boolean {
+        return this.rosApi.connected;
+    }
+
+    /**
      * Connects to the routerboard with the options provided
      */
     public connect(): Promise<RosApiMenu> {
