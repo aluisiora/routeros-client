@@ -83,4 +83,11 @@ export class RouterOSClient {
         return this.disconnect();
     }
 
+    /**
+     * Return the options provided
+     */
+    public getOptions(): IRosOptions {
+        return this.options;
+    }
+
 }
