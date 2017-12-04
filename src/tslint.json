@@ -13,6 +13,7 @@
         "ordered-imports": false,
         "no-trailing-whitespace": false,
         "max-line-length": false,
+        "no-var-requires": false,
         "no-shadowed-variable": false,
         "quotemark": [true, "double", "avoid-escape", "avoid-template"]
     },

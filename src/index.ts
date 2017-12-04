@@ -1,5 +1,7 @@
-import * as sourceMapSupport from "source-map-support";
-if (process.env.ENV !== "production") sourceMapSupport.install();
+if (process.env.ENV === "testing") {
+    const sourceMapSupport = require("source-map-support");
+    sourceMapSupport.install();
+} 
 
 export * from "./RouterOSClient";
 export * from "./RosApiModel";
