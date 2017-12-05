@@ -234,7 +234,11 @@ export abstract class RouterOSAPICrud {
                         break;
                 }
 
-                if (tmpVal === null) tmpVal = "";
+                if (typeof tmpVal === "boolean") {
+                    tmpVal = tmpVal ? "yes" : "no";
+                } else if (tmpVal === null) {
+                    tmpVal = "";
+                }
 
                 tmpKey = (addQuestionMark ? "?" : "=") + tmpKey;
 
