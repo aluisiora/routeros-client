@@ -25,11 +25,14 @@ describe("RouterOSClient", () => {
             });
         });
 
-        it("should not connect with invalid username and password", (done) => {
+        it("should not connect with invalid username and password", function(done) {
+            this.timeout(7000);
+            
             const conn = new RouterOSClient({
                 host: address,
                 user: "admin1",
-                password: "admin1"
+                password: "admin1",
+                timeout: 5
             });
 
             conn.connect().then((api) => {
