@@ -31,6 +31,13 @@ export abstract class RouterOSAPICrud {
     }
 
     /**
+     * Get the current menu
+     */
+    public getCurrentMenu(): string {
+        return this.pathVal;
+    }
+
+    /**
      * Adds an item on the menu
      * 
      * @param data the params that will be used to add the item
