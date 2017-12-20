@@ -1,7 +1,8 @@
 import { RouterOSAPI, IRosOptions, RosException } from "node-routeros";
 import { RosApiMenu } from "./RosApiMenu";
+import { EventEmitter } from "events";
 
-export class RouterOSClient {
+export class RouterOSClient extends EventEmitter {
 
     /**
      * Options of the connection
@@ -20,6 +21,7 @@ export class RouterOSClient {
      * @param options Connection options
      */
     constructor(options: IRosOptions) {
+        super();
         this.options = options;
         this.rosApi = new RouterOSAPI(this.options);
     }
@@ -38,8 +40,11 @@ export class RouterOSClient {
         const api = this.api();
         if (this.rosApi.connected) return Promise.resolve(api);
         return this.rosApi.connect().then(() => {
+            this.emit("connected", api);
+            this.rosApi.once("error", (err: RosException) => this.emit("error", err));
             return Promise.resolve(api);
         }).catch((err: Error) => {
+            this.emit("error", err);
             return Promise.reject(err);
         });
     }
@@ -50,7 +55,7 @@ export class RouterOSClient {
      * 
      * @param options Connection options
      */
-    public setOptions(options: IRosOptions): RouterOSClient {
+    public setOptions(options: any): RouterOSClient {
         Object.assign(this.options, options);
         return this;
     }
@@ -65,21 +70,26 @@ export class RouterOSClient {
     /**
      * Disconnect of the routerboard
      */
-    public disconnect(): Promise<RouterOSAPI> {
-        return this.rosApi.close();
+    public disconnect(): Promise<RouterOSClient> {
+        return this.rosApi.close().then((api) => {
+            this.emit("disconnected", this);
+            return Promise.resolve(this);
+        }).catch((err: RosException) => {
+            return Promise.reject(err);
+        });
     }
 
     /**
      * Alias to disconnect
      */
-    public close(): Promise<RouterOSAPI> {
+    public close(): Promise<RouterOSClient> {
         return this.disconnect();
     }
 
     /**
      * Alias to disconnect
      */
-    public end(): Promise<RouterOSAPI> {
+    public end(): Promise<RouterOSClient> {
         return this.disconnect();
     }
 
