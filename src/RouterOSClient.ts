@@ -68,7 +68,7 @@ export class RouterOSClient extends EventEmitter {
     }
 
     /**
-     * Disconnect of the routerboard
+     * Disconnect from the routerboard
      */
     public disconnect(): Promise<RouterOSClient> {
         return this.rosApi.close().then((api) => {
