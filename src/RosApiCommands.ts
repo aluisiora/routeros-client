@@ -357,7 +357,11 @@ export class RosApiCommands extends RouterOSAPICrud {
             action = "/" + action.replace(/^\//, "");
         }
         const query = this.fullQuery(action);
-        return this.rosApi.stream(query, callback);
+        return this.rosApi.stream(query, (err: RosException, packet: any, stream: Stream) => {
+            if (typeof callback === "function") {
+                callback(err, this.treatMikrotikProperties(packet), stream);
+            } 
+        });
     }
     
 }

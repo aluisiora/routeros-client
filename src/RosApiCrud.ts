@@ -274,6 +274,39 @@ export abstract class RouterOSAPICrud {
     }
 
     /**
+     * Transform mikrotik properties to either camelCase or snake_case
+     * and casts values of true or false to boolean and
+     * integer strings to number
+     * 
+     * @param results the result set of an operation
+     */
+    protected treatMikrotikProperties(results: object[]): object[] {
+        const treatedArr: object[] = [];
+        results.forEach((result) => {
+            const tmpItem = {
+                $$path: this.pathVal
+            };
+            for (const key in result) {
+                if (result.hasOwnProperty(key)) {
+                    const tmpVal = result[key];
+                    let tmpKey = this.snakeCase
+                        ? this.dashedCaseToSnakeCase(key)
+                        : this.dashedCaseToCamelCase(key);
+                    tmpKey = tmpKey.replace(/^\./, "");
+                    tmpItem[tmpKey] = tmpVal;
+                    if (tmpVal === "true" || tmpVal === "false") {
+                        tmpItem[tmpKey] = tmpVal === "true";
+                    } else if (/^\d+(\.\d+)?$/.test(tmpVal)) {
+                        tmpItem[tmpKey] = parseFloat(tmpVal);
+                    }
+                }
+            }
+            treatedArr.push(tmpItem);
+        });
+        return treatedArr;
+    }
+
+    /**
      * Transform camelCase or snake_case to dashed-case,
      * so the routerboard can understand the parameters used
      * on this wrapper
@@ -315,36 +348,4 @@ export abstract class RouterOSAPICrud {
         return val.replace(/-/g, "_");
     }
 
-    /**
-     * Transform mikrotik properties to either camelCase or snake_case
-     * and casts values of true or false to boolean and
-     * integer strings to number
-     * 
-     * @param results the result set of an operation
-     */
-    private treatMikrotikProperties(results: object[]): object[] {
-        const treatedArr: object[] = [];
-        results.forEach((result) => {
-            const tmpItem = {
-                $$path : this.pathVal
-            };
-            for (const key in result) {
-                if (result.hasOwnProperty(key)) {
-                    const tmpVal = result[key];
-                    let tmpKey = this.snakeCase 
-                        ? this.dashedCaseToSnakeCase(key) 
-                        : this.dashedCaseToCamelCase(key);
-                    tmpKey = tmpKey.replace(/^\./, "");
-                    tmpItem[tmpKey] = tmpVal;
-                    if (tmpVal === "true" || tmpVal === "false") {
-                        tmpItem[tmpKey] = tmpVal === "true";
-                    } else if (/^\d+(\.\d+)?$/.test(tmpVal)) {
-                        tmpItem[tmpKey] = parseFloat(tmpVal);
-                    }
-                }
-            }
-            treatedArr.push(tmpItem);
-        });
-        return treatedArr;
-    }
 }
