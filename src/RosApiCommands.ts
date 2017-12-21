@@ -359,7 +359,14 @@ export class RosApiCommands extends RouterOSAPICrud {
         const query = this.fullQuery(action);
         return this.rosApi.stream(query, (err: RosException, packet: any, stream: Stream) => {
             if (typeof callback === "function") {
-                callback(err, this.treatMikrotikProperties(packet), stream);
+                if (packet) {
+                    if (!Array.isArray(packet)) {
+                        packet = this.treatMikrotikProperties([packet])[0];
+                    } else {
+                        packet = this.treatMikrotikProperties(packet);
+                    }
+                }
+                callback(err, packet, stream);
             } 
         });
     }
