@@ -353,6 +353,8 @@ export class RosApiCommands extends RouterOSAPICrud {
         if (typeof action === "function") {
             callback = action;
             action = "";
+        } else if (action && typeof action === "string") {
+            action = "/" + action.replace(/^\//, "");
         }
         const query = this.fullQuery(action);
         return this.rosApi.stream(query, callback);
