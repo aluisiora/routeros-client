@@ -2,6 +2,10 @@ import { RouterOSAPI, RosException, Stream } from "node-routeros";
 import { RouterOSAPICrud } from "./RosApiCrud";
 import { RosApiModel } from "./RosApiModel";
 import { SocPromise } from "./Types";
+import * as debug from "debug";
+
+const info = debug("routeros-client:commands:info");
+const error = debug("routeros-client:commands:error");
 
 export class RosApiCommands extends RouterOSAPICrud {
 
@@ -357,9 +361,12 @@ export class RosApiCommands extends RouterOSAPICrud {
             action = "/" + action.replace(/^\//, "");
         }
         const query = this.fullQuery(action);
+        info("Streaming query %o", query);
         return this.rosApi.stream(query, (err: RosException, packet: any, stream: Stream) => {
+            if (err) error("When streaming, got error: %o", err);
             if (typeof callback === "function") {
                 if (packet) {
+                    info("Received stream packet: %o", packet);
                     if (!Array.isArray(packet)) {
                         packet = this.treatMikrotikProperties([packet])[0];
                     } else {
@@ -367,7 +374,7 @@ export class RosApiCommands extends RouterOSAPICrud {
                     }
                 }
                 callback(err, packet, stream);
-            } 
+            }
         });
     }
     
