@@ -40,7 +40,7 @@
   "devDependencies": {
     "@types/chai": "^4.0.10",
     "@types/debug": "0.0.30",
-    "@types/mocha": "^2.2.44",
+    "@types/mocha": "^2.2.45",
     "@types/node": "^6.0.95",
     "chai": "^4.1.2",
     "mocha": "^4.0.1",
@@ -51,6 +51,6 @@
   },
   "dependencies": {
     "debug": "^3.1.0",
-    "node-routeros": "^1.1.4"
+    "node-routeros": "^1.2.0"
   }
 }
