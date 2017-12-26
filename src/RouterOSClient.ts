@@ -57,6 +57,7 @@ export class RouterOSClient extends EventEmitter {
      */
     public setOptions(options: any): RouterOSClient {
         Object.assign(this.options, options);
+        this.rosApi.setOptions(this.options);
         return this;
     }
 
