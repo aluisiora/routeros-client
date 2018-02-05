@@ -1,19 +1,19 @@
 const RouterOSClient = require("../dist").RouterOSClient;
 const chai = require("chai");
+const config = require("./config.json");
 
 const should = chai.should();
 const expect = chai.expect;
 
-const address = "10.62.0.25";
 let conn, api;
 
 describe("RosApiCommands", () => {
 
     before("should stablish connection and save api object", (done) => {
         conn = new RouterOSClient({
-            host: address,
-            user: "admin",
-            password: "admin",
+            host: config.host,
+            user: config.user,
+            password: config.password,
             keepalive: true
         });
         conn.connect().then((connApi) => {

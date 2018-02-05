@@ -1,9 +1,8 @@
 const RouterOSClient = require("../dist").RouterOSClient;
 const chai = require("chai");
+const config = require("./config.json");
 
 const should = chai.should();
-
-const address = "10.62.0.25";
 
 describe("RouterOSClient", () => {
 
@@ -11,9 +10,9 @@ describe("RouterOSClient", () => {
 
         it("should connect with valid username and password", (done) => {
             const conn = new RouterOSClient({
-                host: address,
-                user: "admin",
-                password: "admin"
+                host: config.host,
+                user: config.user,
+                password: config.password
             });
 
             conn.connect().then((api) => {
@@ -29,7 +28,7 @@ describe("RouterOSClient", () => {
             this.timeout(7000);
             
             const conn = new RouterOSClient({
-                host: address,
+                host: config.host,
                 user: "admin1",
                 password: "admin1",
                 timeout: 5

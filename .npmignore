@@ -15,3 +15,10 @@ temp
 
 # Image files
 images
+
+# Libs don't need this
+package-lock.json
+
+# Reduce package deployed size - source on github
+src/**/*
+test/**/*
