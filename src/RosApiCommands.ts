@@ -1,4 +1,4 @@
-import { RouterOSAPI, RosException, Stream } from "node-routeros";
+import { RouterOSAPI, RosException, RStream } from "node-routeros";
 import { RouterOSAPICrud } from "./RosApiCrud";
 import { RosApiModel } from "./RosApiModel";
 import { SocPromise } from "./Types";
@@ -353,7 +353,7 @@ export class RosApiCommands extends RouterOSAPICrud {
      * @param action optional action to add when streaming, like "listen" for example
      * @param callback 
      */
-    public stream(action: any, callback?: (err: Error, packet?: any, stream?: Stream) => void): Stream {
+    public stream(action: any, callback?: (err: Error, packet?: any, stream?: RStream) => void): RStream {
         if (typeof action === "function") {
             callback = action;
             action = "";
@@ -362,7 +362,7 @@ export class RosApiCommands extends RouterOSAPICrud {
         }
         const query = this.fullQuery(action);
         info("Streaming query %o", query);
-        return this.rosApi.stream(query, (err: RosException, packet: any, stream: Stream) => {
+        return this.rosApi.stream(query, (err: RosException, packet: any, stream: RStream) => {
             if (err) error("When streaming, got error: %o", err);
             if (typeof callback === "function") {
                 if (packet) {
