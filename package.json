@@ -1,6 +1,6 @@
 {
   "name": "routeros-client",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "Easy to use abstraction layer over the node-routeros API",
   "main": "./dist/index",
   "types": "./dist/index",
@@ -38,19 +38,19 @@
   },
   "homepage": "https://github.com/aluisiora/routeros-client#readme",
   "devDependencies": {
-    "@types/chai": "^4.0.10",
+    "@types/chai": "^4.1.2",
     "@types/debug": "0.0.30",
-    "@types/mocha": "^2.2.45",
-    "@types/node": "^6.0.95",
+    "@types/mocha": "^2.2.48",
+    "@types/node": "^6.0.96",
     "chai": "^4.1.2",
-    "mocha": "^4.0.1",
-    "source-map-support": "^0.5.0",
+    "mocha": "^4.1.0",
+    "source-map-support": "^0.5.3",
     "ts-node": "^3.3.0",
-    "tslint": "^5.7.0",
-    "typescript": "^2.6.2"
+    "tslint": "^5.9.1",
+    "typescript": "^2.7.1"
   },
   "dependencies": {
-    "debug": "^3.1.0",
-    "node-routeros": "^1.2.1"
+    "debug": "*",
+    "node-routeros": "*"
   }
 }
