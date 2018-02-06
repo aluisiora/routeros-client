@@ -362,6 +362,8 @@ export class RosApiCommands extends RouterOSAPICrud {
         }
         const query = this.fullQuery(action);
         info("Streaming query %o", query);
+        this.queryVal = [];
+        this.proplistVal = "";
         return this.rosApi.stream(query, (err: RosException, packet: any, stream: RStream) => {
             if (err) error("When streaming, got error: %o", err);
             if (typeof callback === "function") {
