@@ -96,7 +96,7 @@ export class RosApiCommands extends RouterOSAPICrud {
      * @param value the value if a string key is passed
      */
     public query(key: object | string, value?: string): RosApiCommands {
-        return this.where(key, value);
+        return this.where(key, value, false);
     }
 
     /**
@@ -106,7 +106,7 @@ export class RosApiCommands extends RouterOSAPICrud {
      * @param value the value if a string key is passed
      */
     public filter(key: object | string, value?: string): RosApiCommands {
-        return this.where(key, value);
+        return this.where(key, value, false);
     }
 
     /**
