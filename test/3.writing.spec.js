@@ -186,6 +186,47 @@ describe("RouterOSAPICrud", () => {
             });
         });
 
+        it("should add a webproxy acl and another before it, using place-before query, and then remove both without using id", (done) => {
+            const webproxyMenu = api.menu("/ip proxy access");
+            const data1 = {
+                srcAddress: "192.168.88.12",
+                dstHost: ":random\\-site2\\.com",
+                comment: "random rule 2"
+            };
+            const data2 = {
+                srcAddress: "192.168.88.13",
+                dstHost: ":random\\-site3\\.com",
+                comment: "random rule 3",
+                placeBefore: {...data1}
+            };
+
+            let firstRule;
+            let secondRule;
+
+            webproxyMenu.add(data1).then(() => {
+                return webproxyMenu.add(data2);
+            }).then(() => {
+                return webproxyMenu.getAll();
+            }).then((response) => {
+                response.forEach((res) => {
+                    if (res.comment === data1.comment || res.comment === data2.comment) {
+                        if (!firstRule) firstRule = {...res};
+                        else secondRule = {...res};
+                    }
+                });
+                return webproxyMenu.remove(data1);
+            }).then(() => {
+                delete data2.placeBefore;
+                return webproxyMenu.remove(data2);
+            }).then((response) => {
+                firstRule.comment.should.be.equal(data2.comment);
+                secondRule.comment.should.be.equal(data1.comment);
+                done();
+            }).catch((err) => {
+                done(err);
+            });
+        });
+
     });
 
     after("should disconnect", (done) => {

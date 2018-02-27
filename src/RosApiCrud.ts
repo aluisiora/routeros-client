@@ -288,7 +288,7 @@ export abstract class RouterOSAPICrud {
 
         for (const [index, element] of queries.entries()) {
             const str = element.replace(/^\?/, "").replace(/^\=/, "");
-            if ((str.includes(".id=") || str.includes(".place-before=") || str.includes("numbers=")) && /\{.*\}/.test(str)) {
+            if ((str.includes(".id=") || str.includes("place-before=") || str.includes("numbers=")) && /\{.*\}/.test(str)) {
                 const key = str.split("=").shift();
                 const value = JSON.parse(str.split("=").pop());
                 const treatedQuery = [
