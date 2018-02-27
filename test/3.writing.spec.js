@@ -167,6 +167,25 @@ describe("RouterOSAPICrud", () => {
             });
         });
 
+        it("should add a webproxy acl and remove it without id", (done) => {
+            const webproxyMenu = api.menu("/ip proxy access");
+            const data = {
+                srcAddress: "192.168.88.10",
+                dstHost: ":random\\-site\\.com",
+                comment: "random rule"
+            };
+            webproxyMenu.add(data).then((response) => {
+                return webproxyMenu.remove(data);
+            }).then((response) => {
+                return webproxyMenu.where(data).get();
+            }).then((response) => {
+                response.length.should.be.equal(0);
+                done();
+            }).catch((err) => {
+                done(err);
+            });
+        });
+
     });
 
     after("should disconnect", (done) => {

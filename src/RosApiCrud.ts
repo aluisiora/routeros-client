@@ -99,7 +99,9 @@ export abstract class RouterOSAPICrud {
     public exec(command: string, data?: object): Types.SocPromise {
         if (data) this.makeQuery(data);
         const query = this.fullQuery("/" + command);
-        return this.write(query);
+        return this.translateQueryIntoId(query).then((consultedQuery) => {
+            return this.write(consultedQuery);
+        });
     }
 
     /**
@@ -152,8 +154,11 @@ export abstract class RouterOSAPICrud {
      * 
      * @param ids optional id(s) to be removed from the menu
      */
-    public remove(ids?: Types.Id): Types.SocPromise {
-        if (ids) this.queryVal.push("=numbers=" + ids);
+    public remove(ids?: any): Types.SocPromise {
+        if (ids) {
+            ids = this.stringfyIdSearchQuery(ids);
+            this.queryVal.push("=numbers=" + ids);
+        }
         return this.exec("remove");
     }
 
@@ -211,9 +216,11 @@ export abstract class RouterOSAPICrud {
      * 
      * @param searchParameters The key-value pair to add to the search
      */
-    protected makeQuery(searchParameters: object, addQuestionMark: boolean = false): string[] {
+    protected makeQuery(searchParameters: object, addQuestionMark: boolean = false, addToLocalQuery: boolean = true): string[] {
         let tmpKey: string;
         let tmpVal: string | number | boolean | null;
+
+        const tmpQuery = addToLocalQuery ? this.queryVal : [];
 
         for (const key in searchParameters) {
             if (searchParameters.hasOwnProperty(key)) {
@@ -245,17 +252,19 @@ export abstract class RouterOSAPICrud {
                     tmpVal = tmpVal ? "yes" : "no";
                 } else if (tmpVal === null) {
                     tmpVal = "";
+                } else if (typeof tmpVal === "object") {
+                    tmpVal = this.stringfyIdSearchQuery(tmpVal);
                 }
 
                 tmpKey = (addQuestionMark ? "?" : "=") + tmpKey;
 
                 tmpKey = this.camelCaseOrSnakeCaseToDashedCase(tmpKey);
 
-                this.queryVal.push(tmpKey + "=" + tmpVal);
+                tmpQuery.push(tmpKey + "=" + tmpVal);
             }
         }
 
-        return this.queryVal;
+        return tmpQuery;
     }
 
     /**
@@ -270,6 +279,38 @@ export abstract class RouterOSAPICrud {
             return Promise.resolve(this.treatMikrotikProperties(results));
         }).catch((err: RosException) => {
             return Promise.reject(err);
+        });
+    }
+
+    protected translateQueryIntoId(queries: string[]): Promise<any> {
+        const promises = [];
+        const consultedIndexes = [];
+
+        for (const [index, element] of queries.entries()) {
+            const str = element.replace(/^\?/, "").replace(/^\=/, "");
+            if ((str.includes(".id=") || str.includes(".place-before=") || str.includes("numbers=")) && /\{.*\}/.test(str)) {
+                const key = str.split("=").shift();
+                const value = JSON.parse(str.split("=").pop());
+                const treatedQuery = [
+                    this.pathVal + "/print",
+                    "=.proplist=.id"
+                ].concat(this.makeQuery(value, true, false));
+                const promise = this.rosApi.write(treatedQuery);
+                consultedIndexes.push({
+                    index: index,
+                    key: key
+                });
+                promises.push(promise);
+            }
+        }
+
+        return Promise.all(promises).then((results) => {
+            for (let result of results) {
+                if (Array.isArray(result)) result = result.shift();
+                const consulted = consultedIndexes.shift();
+                queries[consulted.index] = "=" + consulted.key + "=" + result[".id"];
+            }
+            return Promise.resolve(queries);
         });
     }
 
@@ -304,6 +345,20 @@ export abstract class RouterOSAPICrud {
             treatedArr.push(tmpItem);
         });
         return treatedArr;
+    }
+
+    private stringfyIdSearchQuery(items: any): any {
+        let isArray = true;
+        const newItems = [];
+        if (!Array.isArray(items)) {
+            isArray = false;
+            items = [items];
+        } 
+        for (const item of items) {
+            if (typeof item === "object") newItems.push(JSON.stringify(item));
+            else newItems.push(item);
+        }
+        return isArray ? newItems : newItems.shift();
     }
 
     /**
