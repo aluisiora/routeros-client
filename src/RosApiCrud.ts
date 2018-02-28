@@ -13,6 +13,8 @@ export abstract class RouterOSAPICrud {
 
     protected snakeCase: boolean;
 
+    private needsObjectTranslation: boolean = false;
+
     /**
      * Creates a CRUD set of operations and handle
      * the raw query to input on the raw API
@@ -66,7 +68,10 @@ export abstract class RouterOSAPICrud {
      * @param ids the id(s) or number(s) to disable
      */
     public disable(ids?: Types.Id): Types.SocPromise {
-        if (ids) this.queryVal.push("=numbers=" + ids);
+        if (ids) {
+            ids = this.stringfySearchQuery(ids);
+            this.queryVal.push("=numbers=" + ids);
+        }
         return this.exec("disable");
     }
     
@@ -76,7 +81,10 @@ export abstract class RouterOSAPICrud {
      * @param ids the id(s) or number(s) to delete
      */
     public delete(ids?: Types.Id): Types.SocPromise {
-        if (ids) this.queryVal.push("=numbers=" + ids);
+        if (ids) {
+            ids = this.stringfySearchQuery(ids);
+            this.queryVal.push("=numbers=" + ids);
+        }
         return this.remove(ids);
     }
 
@@ -86,7 +94,10 @@ export abstract class RouterOSAPICrud {
      * @param ids the id(s) or number(s) to enable
      */
     public enable(ids?: Types.Id): Types.SocPromise {
-        if (ids) this.queryVal.push("=numbers=" + ids);
+        if (ids) {
+            ids = this.stringfySearchQuery(ids);
+            this.queryVal.push("=numbers=" + ids);
+        }
         return this.exec("enable");
     }
     
@@ -112,8 +123,12 @@ export abstract class RouterOSAPICrud {
      */
     public move(from: Types.Id, to?: string | number): Types.SocPromise {
         if (!Array.isArray(from)) from = [from];
+        from = this.stringfySearchQuery(from);
         this.queryVal.push("=numbers=" + from);
-        if (to) this.queryVal.push("=destination=" + to);
+        if (to) {
+            to = this.stringfySearchQuery(to);
+            this.queryVal.push("=destination=" + to);
+        }
         return this.exec("move");
     }
 
@@ -124,7 +139,10 @@ export abstract class RouterOSAPICrud {
      * @param ids optional id(s) of the rules
      */
     public update(data: object, ids?: Types.Id): Types.SocPromise {
-        if (ids) this.queryVal.push("=numbers=" + ids);
+        if (ids) {
+            ids = this.stringfySearchQuery(ids);
+            this.queryVal.push("=numbers=" + ids);
+        }
         this.makeQuery(data);
         return this.exec("set");
     }
@@ -136,7 +154,10 @@ export abstract class RouterOSAPICrud {
      * @param ids the id(s) of the entries to unset the property(ies)
      */
     public unset(properties: string | string[], ids?: Types.Id): Types.SocPromise {
-        if (ids) this.queryVal.push("=numbers=" + ids);
+        if (ids) {
+            ids = this.stringfySearchQuery(ids);
+            this.queryVal.push("=numbers=" + ids);
+        }
         if (typeof properties === "string") properties = [properties];
         const $q: Types.SocPromise[] = [];
         const curQueryVal = this.queryVal.slice();
@@ -156,7 +177,7 @@ export abstract class RouterOSAPICrud {
      */
     public remove(ids?: any): Types.SocPromise {
         if (ids) {
-            ids = this.stringfyIdSearchQuery(ids);
+            ids = this.stringfySearchQuery(ids);
             this.queryVal.push("=numbers=" + ids);
         }
         return this.exec("remove");
@@ -253,7 +274,7 @@ export abstract class RouterOSAPICrud {
                 } else if (tmpVal === null) {
                     tmpVal = "";
                 } else if (typeof tmpVal === "object") {
-                    tmpVal = this.stringfyIdSearchQuery(tmpVal);
+                    tmpVal = this.stringfySearchQuery(tmpVal);
                 }
 
                 tmpKey = (addQuestionMark ? "?" : "=") + tmpKey;
@@ -282,8 +303,17 @@ export abstract class RouterOSAPICrud {
         });
     }
 
+    /**
+     * Translates .id, place-before and number without using internal
+     * mikrotik id (something like *4A).
+     * 
+     * This should check if one of those parameters are an object
+     * and use that object to search the real id of the item.
+     * 
+     * @param queries query array
+     */
     protected translateQueryIntoId(queries: string[]): Promise<any> {
-        if (queries.length === 0) return Promise.resolve(queries);
+        if (queries.length === 0 || !this.needsObjectTranslation) return Promise.resolve(queries);
         
         const promises = [];
         const consultedIndexes = [];
@@ -312,6 +342,7 @@ export abstract class RouterOSAPICrud {
                 const consulted = consultedIndexes.shift();
                 queries[consulted.index] = "=" + consulted.key + "=" + result[".id"];
             }
+            this.needsObjectTranslation = false;
             return Promise.resolve(queries);
         });
     }
@@ -349,16 +380,24 @@ export abstract class RouterOSAPICrud {
         return treatedArr;
     }
 
-    private stringfyIdSearchQuery(items: any): any {
+    /**
+     * Stringify a json formated object to be used later
+     * for a translation
+     * 
+     * @param items object items to stringfy
+     */
+    private stringfySearchQuery(items: any): any {
         let isArray = true;
         const newItems = [];
         if (!Array.isArray(items)) {
             isArray = false;
             items = [items];
-        } 
+        }
         for (const item of items) {
-            if (typeof item === "object") newItems.push(JSON.stringify(item));
-            else newItems.push(item);
+            if (typeof item === "object") {
+                this.needsObjectTranslation = true;
+                newItems.push(JSON.stringify(item));
+            } else newItems.push(item);
         }
         return isArray ? newItems : newItems.shift();
     }
