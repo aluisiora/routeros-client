@@ -283,6 +283,8 @@ export abstract class RouterOSAPICrud {
     }
 
     protected translateQueryIntoId(queries: string[]): Promise<any> {
+        if (queries.length === 0) return Promise.resolve(queries);
+        
         const promises = [];
         const consultedIndexes = [];
 
