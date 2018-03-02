@@ -15,6 +15,8 @@ export abstract class RouterOSAPICrud {
 
     private needsObjectTranslation: boolean = false;
 
+    private placeAfter: any;
+
     /**
      * Creates a CRUD set of operations and handle
      * the raw query to input on the raw API
@@ -112,6 +114,8 @@ export abstract class RouterOSAPICrud {
         const query = this.fullQuery("/" + command);
         return this.translateQueryIntoId(query).then((consultedQuery) => {
             return this.write(consultedQuery);
+        }).then((results) => {
+            return this.prepareToPlaceAfter(results);
         });
     }
 
@@ -275,7 +279,10 @@ export abstract class RouterOSAPICrud {
                     tmpVal = "";
                 } else if (typeof tmpVal === "object") {
                     tmpVal = this.stringfySearchQuery(tmpVal);
-                }
+                } else if (tmpKey === "placeAfter") {
+                    this.placeAfter = tmpVal;
+                    tmpKey = "placeBefore";
+                }                
 
                 tmpKey = (addQuestionMark ? "?" : "=") + tmpKey;
 
@@ -298,8 +305,6 @@ export abstract class RouterOSAPICrud {
         this.proplistVal = "";
         return this.rosApi.write(query).then((results) => {
             return Promise.resolve(this.treatMikrotikProperties(results));
-        }).catch((err: RosException) => {
-            return Promise.reject(err);
         });
     }
 
@@ -320,30 +325,55 @@ export abstract class RouterOSAPICrud {
 
         for (const [index, element] of queries.entries()) {
             const str = element.replace(/^\?/, "").replace(/^\=/, "");
-            if ((str.includes(".id=") || str.includes("place-before=") || str.includes("numbers=")) && /\{.*\}/.test(str)) {
-                const key = str.split("=").shift();
-                const value = JSON.parse(str.split("=").pop());
-                const treatedQuery = [
-                    this.pathVal + "/print",
-                    "=.proplist=.id"
-                ].concat(this.makeQuery(value, true, false));
-                const promise = this.rosApi.write(treatedQuery);
-                consultedIndexes.push({
-                    index: index,
-                    key: key
-                });
-                promises.push(promise);
+            if (str.includes(".id=") || str.includes("place-before=") || str.includes("place-after=") || str.includes("numbers=")) {
+                
+                if (/\{.*\}/.test(str)) {
+                    const key = str.split("=").shift();
+                    const value = JSON.parse(str.split("=").pop());
+                    const treatedQuery = [
+                        this.pathVal + "/print",
+                        "=.proplist=.id"
+                    ].concat(this.makeQuery(value, true, false));
+                    const promise = this.rosApi.write(treatedQuery);
+                    consultedIndexes.push({
+                        index: index,
+                        key: key
+                    });
+                    promises.push(promise);
+                }
+                
             }
-        }
+        } 
 
         return Promise.all(promises).then((results) => {
             for (let result of results) {
                 if (Array.isArray(result)) result = result.shift();
                 const consulted = consultedIndexes.shift();
+                if (consulted.key === "place-after") {
+                    this.placeAfter = result[".id"];
+                    consulted.key = "place-before";
+                }
                 queries[consulted.index] = "=" + consulted.key + "=" + result[".id"];
             }
             this.needsObjectTranslation = false;
             return Promise.resolve(queries);
+        });
+    }
+
+    /**
+     * If the place-after feature was used, the rule below
+     * will be moved above here.
+     * 
+     * @param results 
+     */
+    protected prepareToPlaceAfter(results): Promise<any> {
+        if (!this.placeAfter || results.length !== 1) return Promise.resolve(results);
+        if (!results[0].ret) return Promise.resolve(results);
+        const from = this.placeAfter;
+        const to = results[0].ret;
+        this.placeAfter = null;
+        return this.move(from, to).then(() => {
+            return Promise.resolve(results);
         });
     }
 
