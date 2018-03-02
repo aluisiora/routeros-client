@@ -227,6 +227,125 @@ describe("RouterOSAPICrud", () => {
             });
         });
 
+        it("should add 3 rules and insert a 4th rule after the first without id", (done) => {
+            const webproxyMenu = api.menu("/ip proxy access");
+            const data1 = {
+                srcAddress: "192.168.88.11",
+                dstHost: ":random\\-site11\\.com",
+                comment: "random rule 11"
+            };
+            const data2 = {
+                srcAddress: "192.168.88.22",
+                dstHost: ":random\\-site22\\.com",
+                comment: "random rule 22"
+            };
+            const data3 = {
+                srcAddress: "192.168.88.33",
+                dstHost: ":random\\-site33\\.com",
+                comment: "random rule 33"
+            };
+            const data4 = {
+                srcAddress: "192.168.88.44",
+                dstHost: ":random\\-site44\\.com",
+                comment: "random rule 44",
+                placeAfter: {...data1}
+            };
+
+            let firstRule;
+            let secondRule;
+
+            webproxyMenu.add(data1).then(() => {
+                return webproxyMenu.add(data2);
+            }).then(() => {
+                return webproxyMenu.add(data3);
+            }).then(() => {
+                return webproxyMenu.add(data4);
+            }).then(() => {
+                return webproxyMenu.getAll();
+            }).then((response) => {
+                response.forEach((res) => {
+                    if (firstRule && !secondRule) {
+                        secondRule = res;                        
+                    } else if (res.comment === data1.comment) {
+                        firstRule = res;
+                    }
+                });
+                return webproxyMenu.remove(data1);
+            }).then(() => {
+                return webproxyMenu.remove(data2);
+            }).then(() => {
+                return webproxyMenu.remove(data3);
+            }).then(() => {
+                delete data4.placeAfter;
+                return webproxyMenu.remove(data4);
+            }).then(() => {
+                secondRule.comment.should.be.equal(data4.comment);
+                done();
+            }).catch((err) => {
+                done(err);
+            });
+        });
+
+        it("should add 3 rules and insert a 4th rule after the first with id", (done) => {
+            const webproxyMenu = api.menu("/ip proxy access");
+            const data1 = {
+                srcAddress: "192.168.90.11",
+                dstHost: ":random\\-site11\\.com",
+                comment: "random rule 11"
+            };
+            const data2 = {
+                srcAddress: "192.168.90.22",
+                dstHost: ":random\\-site22\\.com",
+                comment: "random rule 22"
+            };
+            const data3 = {
+                srcAddress: "192.168.90.33",
+                dstHost: ":random\\-site33\\.com",
+                comment: "random rule 33"
+            };
+            const data4 = {
+                srcAddress: "192.168.90.44",
+                dstHost: ":random\\-site44\\.com",
+                comment: "random rule 44"
+            };
+
+            let firstRule;
+            let secondRule;
+            let firstRid;
+
+            webproxyMenu.add(data1).then((response) => {
+                firstRid = response.ret;
+                return webproxyMenu.add(data2);
+            }).then(() => {
+                return webproxyMenu.add(data3);
+            }).then(() => {
+                data4.placeAfter = firstRid;
+                return webproxyMenu.add(data4);
+            }).then(() => {
+                return webproxyMenu.getAll();
+            }).then((response) => {
+                response.forEach((res) => {
+                    if (firstRule && !secondRule) {
+                        secondRule = res;
+                    } else if (res.comment === data1.comment) {
+                        firstRule = res;
+                    }
+                });
+                return webproxyMenu.remove(data1);
+            }).then(() => {
+                return webproxyMenu.remove(data2);
+            }).then(() => {
+                return webproxyMenu.remove(data3);
+            }).then(() => {
+                delete data4.placeAfter;
+                return webproxyMenu.remove(data4);
+            }).then(() => {
+                secondRule.comment.should.be.equal(data4.comment);
+                done();
+            }).catch((err) => {
+                done(err);
+            });
+        });
     });
 
     after("should disconnect", (done) => {
