@@ -1,6 +1,6 @@
 {
   "name": "routeros-client",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "Easy to use abstraction layer over the node-routeros API",
   "main": "./dist/index",
   "types": "./dist/index",
@@ -51,6 +51,6 @@
   },
   "dependencies": {
     "debug": "^3.*",
-    "node-routeros": "^1.3.3"
+    "node-routeros": "^1.*"
   }
 }
