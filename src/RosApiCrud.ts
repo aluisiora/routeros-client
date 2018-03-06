@@ -348,8 +348,8 @@ export abstract class RouterOSAPICrud {
         return Promise.all(promises).then((results) => {
             for (let result of results) {
                 if (Array.isArray(result)) result = result.shift();
-                if (!result) return Promise.reject(new RosException("REFNOTFND"));
                 const consulted = consultedIndexes.shift();
+                if (!result) return Promise.reject(new RosException("REFNOTFND", { key: consulted.key}));
                 if (consulted.key === "place-after") {
                     this.placeAfter = result[".id"];
                     consulted.key = "place-before";
