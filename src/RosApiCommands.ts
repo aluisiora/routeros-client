@@ -294,7 +294,7 @@ export class RosApiCommands extends RouterOSAPICrud {
     }
 
     /**
-     * Returns the first item if found
+     * Returns the first item if found, else return null
      * 
      * @param data optional filtering, like what you get when using the where function
      */
@@ -302,6 +302,7 @@ export class RosApiCommands extends RouterOSAPICrud {
         return this.get(data).then((results) => {
             let result: object = new Object();
             if (results.length > 0) result = results[0];
+            else result = null;
             return Promise.resolve(result);
         }).catch((err: RosException) => {
             return Promise.reject(err);
