@@ -26,6 +26,24 @@ describe("RosApiCommands", () => {
 
     describe("printing and filtering prints", () => {
 
+        it("should get return nothing from /interface where name is ether6", (done) => {
+            api.menu("/interface").where("name", "ether6").getOnly().then((interf) => {
+                expect(interf).to.be.equal(null);
+                done();
+            }).catch((err) => {
+                done(err);
+            });
+        });
+
+        it("should get return nothing from /ip firewall raw", (done) => {
+            api.menu("/ip firewall raw").get().then((rules) => {
+                rules.length.should.be.equal(0);
+                done();
+            }).catch((err) => {
+                done(err);
+            });
+        });
+
         it("should get all interfaces from /interface", (done) => {
             api.menu("/interface").get().then((interfaces) => {
                 interfaces.length.should.be.above(0);
