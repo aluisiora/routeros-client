@@ -34,8 +34,8 @@ export class RosApiModel extends RouterOSAPICrud {
      * Disable itself
      */
     public disable(): Types.SocPromise {
-        return super.disable(this.originalItem.id).then(() => {
-            return this.refreshData();
+        return super.disable(this.originalItem.id).then((response) => {
+            return this.refreshData(response);
         }).catch((err: RosException) => {
             return Promise.reject(err);
         });
@@ -45,8 +45,8 @@ export class RosApiModel extends RouterOSAPICrud {
      * Enable itself
      */
     public enable(): Types.SocPromise {
-        return super.enable(this.originalItem.id).then(() => {
-            return this.refreshData();
+        return super.enable(this.originalItem.id).then((response) => {
+            return this.refreshData(response);
         }).catch((err: RosException) => {
             return Promise.reject(err);
         });
@@ -58,8 +58,8 @@ export class RosApiModel extends RouterOSAPICrud {
      * @param to where to move to
      */
     public move(to?: string | number): Types.SocPromise {
-        return super.move(this.originalItem.id, to).then(() => {
-            return this.refreshData();
+        return super.move(this.originalItem.id, to).then((response) => {
+            return this.refreshData(response);
         }).catch((err: RosException) => {
             return Promise.reject(err);
         });
@@ -70,8 +70,8 @@ export class RosApiModel extends RouterOSAPICrud {
      * @param properties properties to unset
      */
     public unset(properties: string | string[]): Types.SocPromise {
-        return super.unset(properties, this.originalItem.id).then(() => {
-            return this.refreshData();
+        return super.unset(properties, this.originalItem.id).then((response) => {
+            return this.refreshData(response);
         }).catch((err: RosException) => {
             return Promise.reject(err);
         });
@@ -83,8 +83,8 @@ export class RosApiModel extends RouterOSAPICrud {
      * @param data new data to update to
      */
     public update(data: object): Types.SocPromise {
-        return super.update(data, this.originalItem.id).then(() => {
-            return this.refreshData();
+        return super.update(data, this.originalItem.id).then((response) => {
+            return this.refreshData(response);
         }).catch((err: RosException) => {
             return Promise.reject(err);
         });
@@ -134,22 +134,11 @@ export class RosApiModel extends RouterOSAPICrud {
      * Refresh this object with new data of the item
      * after printing it again
      */
-    private refreshData(): Types.SocPromise {
-        const originalQueryVal = this.queryVal.slice();
-        const originalProplistVal = this.proplistVal;
-        return this.write([
-            this.originalItem.$$path + "/print",
-            "?.id=" + this.originalItem.id
-        ]).then((response: any[]) => {
-            this.cleanDissolvedProperties();
-            this.originalItem = response[0];
-            this.dissolveProperties();
-            this.queryVal = originalQueryVal;
-            this.proplistVal = originalProplistVal;
-            return Promise.resolve(this);
-        }).catch((err: RosException) => {
-            return Promise.reject(err);
-        });
+    private refreshData(response: any): Types.SocPromise {
+        this.cleanDissolvedProperties();
+        this.originalItem = response;
+        this.dissolveProperties();
+        return Promise.resolve(this);
     }
 
 }

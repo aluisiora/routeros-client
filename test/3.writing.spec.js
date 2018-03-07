@@ -33,16 +33,21 @@ describe("RouterOSAPICrud", () => {
     describe("handling crud operations", () => {
 
         it("should add three firewall filter rules on chain forward", (done) => {
-
-            menu = api.menu("/ip firewall filter");
-            menu.add({
+            const data = {
                 chain: "forward",
                 protocol: "tcp",
                 action: "accept",
                 comment: "first rule"
-            }).then((response) => {
-                response.should.have.property("ret").and.match(/^\*/);
-                firstRule = response.ret;
+            };
+
+            menu = api.menu("/ip firewall filter");
+            menu.add(data).then((response) => {
+                response.should.have.property("id").and.match(/^\*/);
+                response.should.have.property("comment").and.be.equal(data.comment);
+                response.should.have.property("chain").and.be.equal(data.chain);
+                response.should.have.property("protocol").and.be.equal(data.protocol);
+                response.should.have.property("action").and.be.equal(data.action);
+                firstRule = response.id;
                 return menu.add({
                     chain: "forward",
                     protocol: "udp",
@@ -51,8 +56,8 @@ describe("RouterOSAPICrud", () => {
                     comment: "second rule"
                 });
             }).then((response) => {
-                response.should.have.property("ret").and.match(/^\*/);
-                secondRule = response.ret;
+                response.should.have.property("id").and.match(/^\*/);
+                secondRule = response.id;
                 return menu.add({
                     chain: "forward",
                     protocol: "udp",
@@ -61,8 +66,8 @@ describe("RouterOSAPICrud", () => {
                     comment: "third rule"
                 });
             }).then((response) => {
-                response.should.have.property("ret").and.match(/^\*/);
-                thirdRule = response.ret;
+                response.should.have.property("id").and.match(/^\*/);
+                thirdRule = response.id;
                 done();
             }).catch((err) => {
                 done(err);
@@ -72,7 +77,7 @@ describe("RouterOSAPICrud", () => {
 
         it("should update the first rule", (done) => {
             menu.where("id", firstRule).update({ disabled: true }).then((response) => {
-                response.length.should.be.equal(0);
+                response.should.have.property("disabled").and.be.equal(true);
                 done();
             }).catch((err) => {
                 done(err);
@@ -81,7 +86,9 @@ describe("RouterOSAPICrud", () => {
 
         it("should unset the protocol value of the second filter rule", (done) => {
             menu.unset("protocol", secondRule).then((response) => {
-                response.length.should.be.equal(1);
+                response.should.have.property("id").and.be.equal(secondRule);
+                response.should.have.property("comment").and.be.equal("second rule");
+                response.should.not.have.property("protocol");
                 done();
             }).catch((err) => {
                 done(err);
@@ -90,7 +97,7 @@ describe("RouterOSAPICrud", () => {
 
         it("should move the second rule above first rule", (done) => {
             menu.move(secondRule, firstRule).then((response) => {
-                response.length.should.be.equal(0);
+                response.should.have.property("id").and.be.equal(secondRule);
                 done();
             }).catch((err) => {
                 done(err);
@@ -121,6 +128,8 @@ describe("RouterOSAPICrud", () => {
         it("should add a source address to the third rule", (done) => {
             item.update({srcAddress: "6.6.6.6"}).then((result) => {
                 item.srcAddress.should.be.equal("6.6.6.6");
+                result.srcAddress.should.be.equal("6.6.6.6");
+                if (item !== result) done("Not the same object");
                 done();
             }).catch((err) => {
                 done(err);
@@ -130,6 +139,7 @@ describe("RouterOSAPICrud", () => {
         it("should unset the source address from the third rule", (done) => {
             item.unset("srcAddress").then((result) => {
                 item.should.not.have.property("srcAddress");
+                if (item !== result) done("Not the same object");
                 done();
             }).catch((err) => {
                 done(err);
@@ -137,7 +147,9 @@ describe("RouterOSAPICrud", () => {
         });
 
         it("should move the third rule above the first rule", (done) => {
-            item.move(firstRule).then((response) => {
+            item.move(firstRule).then((result) => {
+                result.should.have.property("id").and.be.equal(item.id);
+                if (item !== result) done("Not the same object");
                 done();
             }).catch((err) => {
                 done(err);
@@ -145,7 +157,8 @@ describe("RouterOSAPICrud", () => {
         });
 
         it("should remove the third rule", (done) => {
-            item.remove().then(() => {
+            item.remove().then((result) => {
+                result.should.have.property("id").and.be.equal(item.id);
                 done();
             }).catch((err) => {
                 done(err);
@@ -153,14 +166,16 @@ describe("RouterOSAPICrud", () => {
         });
 
         it("should delete the added filter rules", (done) => {
+            let firstId, secondId;
             menu.only("id").where({ comment: "first rule" }).orWhere({ comment: "second rule" }).get().then((response) => {
                 response.length.should.be.equal(2);
-                return menu.remove([
-                    response[0].id,
-                    response[1].id
-                ]);
+                firstId = response[0].id;
+                secondId = response[1].id;
+                return menu.remove([firstId, secondId]);
             }).then((response) => {
-                response.length.should.be.equal(0);
+                response.length.should.be.equal(2);
+                response[0].should.have.property("id").and.be.equal(firstId);
+                response[1].should.have.property("id").and.be.equal(secondId);
                 done();
             }).catch((err) => {
                 done(err);
@@ -314,7 +329,7 @@ describe("RouterOSAPICrud", () => {
             let firstRid;
 
             webproxyMenu.add(data1).then((response) => {
-                firstRid = response.ret;
+                firstRid = response.id;
                 return webproxyMenu.add(data2);
             }).then(() => {
                 return webproxyMenu.add(data3);
