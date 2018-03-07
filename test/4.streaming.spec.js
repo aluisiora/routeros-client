@@ -30,7 +30,7 @@ describe("RosApiCommands", () => {
 
             const menu = api.menu("/tool/torch");
             let started = false;
-            menu.where("interface", "ether4").stream((err, packet, torch) => {
+            menu.where("interface", "ether1").stream((err, packet, torch) => {
                 should.not.exist(err);
                 should.exist(packet);
 

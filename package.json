@@ -1,7 +1,7 @@
 {
   "name": "routeros-client",
-  "version": "0.8.1",
-  "description": "Easy to use abstraction layer over the node-routeros API",
+  "version": "0.9.0",
+  "description": "Abstraction layer over the node-routeros API",
   "main": "./dist/index",
   "types": "./dist/index",
   "directories": {
