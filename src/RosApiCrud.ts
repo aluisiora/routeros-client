@@ -1,4 +1,5 @@
 import { RouterOSAPI, RosException } from "node-routeros";
+import { flatten } from "lodash";
 import * as utils from "./utils";
 import * as Types from "./Types";
 
@@ -49,10 +50,8 @@ export abstract class RouterOSAPICrud {
      */
     public add(data: object): Types.SocPromise {
         return this.exec("add", data).then((results: any) => {
-            if (results.length > 0) results = results[0];
-            return Promise.resolve(results);
-        }).catch((err: RosException) => {
-            return Promise.reject(err);
+            if (results.length === 0) return Promise.resolve(null);
+            return this.recoverDataFromIdsOfChangedItems(null, results[0].ret);
         });
     }
     
@@ -75,7 +74,10 @@ export abstract class RouterOSAPICrud {
             ids = this.stringfySearchQuery(ids);
             this.queryVal.push("=numbers=" + ids);
         }
-        return this.exec("disable");
+        const disabledIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
+        return this.exec("disable").then((response: any[]) => {
+            return this.recoverDataFromIdsOfChangedItems(response, disabledIds);
+        });
     }
     
     /**
@@ -84,10 +86,6 @@ export abstract class RouterOSAPICrud {
      * @param ids the id(s) or number(s) to delete
      */
     public delete(ids?: Types.Id): Types.SocPromise {
-        if (ids) {
-            ids = this.stringfySearchQuery(ids);
-            this.queryVal.push("=numbers=" + ids);
-        }
         return this.remove(ids);
     }
 
@@ -101,7 +99,10 @@ export abstract class RouterOSAPICrud {
             ids = this.stringfySearchQuery(ids);
             this.queryVal.push("=numbers=" + ids);
         }
-        return this.exec("enable");
+        const enabledIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
+        return this.exec("enable").then((response: any[]) => {
+            return this.recoverDataFromIdsOfChangedItems(response, enabledIds);
+        });
     }
     
     /**
@@ -136,7 +137,10 @@ export abstract class RouterOSAPICrud {
             to = this.stringfySearchQuery(to);
             this.queryVal.push("=destination=" + to);
         }
-        return this.exec("move");
+        const movedIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
+        return this.exec("move").then((response: any[]) => {
+            return this.recoverDataFromIdsOfChangedItems(response, movedIds);
+        });
     }
 
     /**
@@ -151,7 +155,10 @@ export abstract class RouterOSAPICrud {
             this.queryVal.push("=numbers=" + ids);
         }
         this.makeQuery(data);
-        return this.exec("set");
+        const updatedIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
+        return this.exec("set").then((response: any[]) => {
+            return this.recoverDataFromIdsOfChangedItems(response, updatedIds);
+        });
     }
 
     /**
@@ -167,14 +174,41 @@ export abstract class RouterOSAPICrud {
         }
         if (typeof properties === "string") properties = [properties];
         const $q: Types.SocPromise[] = [];
+        
+        // Saving current queryVal for reuse, since running exec will reset it
         const curQueryVal = this.queryVal.slice();
+        const updatedIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
+
+        // Cleaning current queryVal to prevent duplication
         this.queryVal = [];
         properties.forEach((property) => {
+            // Putting back queryVal after a cleanup
             this.queryVal = curQueryVal.slice();
             this.queryVal.push("=value-name=" + utils.camelCaseOrSnakeCaseToDashedCase(property));
             $q.push(this.exec("unset"));
         });
-        return Promise.all($q);
+        return Promise.all($q).then((data: any[]) => {
+            data = flatten(data);
+            return Promise.resolve(data);
+        }).then((response: any[]) => {
+            if (!response || !updatedIds) return Promise.resolve(response);
+            const promises = [];
+            const ids = updatedIds.split(",");
+            for (const id of ids) {
+                const promise = this.rosApi.write([
+                    this.pathVal + "/print",
+                    "?.id=" + id
+                ]);
+                promises.push(promise);
+            }
+            return Promise.all(promises);
+        }).then((data) => {
+            if (!data) return Promise.resolve(data);
+            data = flatten(data);
+            data = this.treatMikrotikProperties(data);
+            if (!updatedIds.includes(",")) return Promise.resolve(data[0]);
+            return Promise.resolve(data);
+        });
     }
 
     /**
@@ -187,7 +221,31 @@ export abstract class RouterOSAPICrud {
             ids = this.stringfySearchQuery(ids);
             this.queryVal.push("=numbers=" + ids);
         }
-        return this.exec("remove");
+        const idsForRemoval = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
+        if (!idsForRemoval) return this.exec("remove");
+
+        const promises = [];
+        const foundIds = idsForRemoval.split(",");
+        for (const id of foundIds) {
+            const promise = this.rosApi.write([
+                this.pathVal + "/print",
+                "?.id=" + id
+            ]);
+            promises.push(promise);
+        }
+        let responseData;
+        return Promise.all(promises).then((data: any) => {
+            if (!data) return Promise.resolve(data);
+            data = flatten(data);
+            data = this.treatMikrotikProperties(data);
+            if (!idsForRemoval.includes(",")) return Promise.resolve(data[0]);
+            return Promise.resolve(data);
+        }).then((data: any) => {
+            responseData = data;
+            return this.exec("remove");
+        }).then(() => {
+            return Promise.resolve(responseData);
+        });
     }
 
     /**
@@ -310,16 +368,6 @@ export abstract class RouterOSAPICrud {
             return Promise.resolve(this.treatMikrotikProperties(results));
         });
     }
-
-    protected lookForIdParameterAndReturnItsValue(): string {
-        let val = null;
-        for (const query of this.queryVal) {
-            if (query.includes("numbers=") || query.includes(".id=")) {
-                val = query.split("=").pop();
-            }
-        }
-        return val;
-    } 
 
     /**
      * Translates .id, place-before and number without using internal
@@ -444,6 +492,33 @@ export abstract class RouterOSAPICrud {
             } else newItems.push(item);
         }
         return isArray ? newItems : newItems.shift();
+    }
+
+    /**
+     * Clean data print of provided ids, used only when
+     * creating, editting or unsetting properties
+     * 
+     * @param data 
+     * @param ids 
+     */
+    private recoverDataFromIdsOfChangedItems(data: any[], ids?: string): Promise<any | any[]> {
+        if (!ids) return Promise.resolve(data);
+        const promises = [];
+        const splittedIds = ids.split(",");
+        for (const id of splittedIds) {
+            const promise = this.rosApi.write([
+                this.pathVal + "/print",
+                "?.id=" + id
+            ]);
+            promises.push(promise);
+        }
+        return Promise.all(promises).then((data) => {
+            if (!data) return Promise.resolve(data);
+            data = flatten(data);
+            data = this.treatMikrotikProperties(data);
+            if (!ids.includes(",")) return Promise.resolve(data[0]);
+            return Promise.resolve(data);
+        });
     }
 
 }
