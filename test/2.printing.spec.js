@@ -35,9 +35,9 @@ describe("RosApiCommands", () => {
             });
         });
 
-        it("should get return nothing from /ip firewall raw", (done) => {
-            api.menu("/ip firewall raw").get().then((rules) => {
-                rules.length.should.be.equal(0);
+        it("should get return nothing from /ppp active", (done) => {
+            api.menu("/ppp active").get().then((items) => {
+                items.length.should.be.equal(0);
                 done();
             }).catch((err) => {
                 done(err);
