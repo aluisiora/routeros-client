@@ -1,4 +1,5 @@
 import { RouterOSAPI, RosException } from "node-routeros";
+import * as utils from "./utils";
 import * as Types from "./Types";
 
 export abstract class RouterOSAPICrud {
@@ -115,6 +116,8 @@ export abstract class RouterOSAPICrud {
         return this.translateQueryIntoId(query).then((consultedQuery) => {
             return this.write(consultedQuery);
         }).then((results) => {
+            // Only runs when using the place-after feature
+            // otherwise it will return the response immediately
             return this.prepareToPlaceAfter(results);
         });
     }
@@ -168,7 +171,7 @@ export abstract class RouterOSAPICrud {
         this.queryVal = [];
         properties.forEach((property) => {
             this.queryVal = curQueryVal.slice();
-            this.queryVal.push("=value-name=" + this.camelCaseOrSnakeCaseToDashedCase(property));
+            this.queryVal.push("=value-name=" + utils.camelCaseOrSnakeCaseToDashedCase(property));
             $q.push(this.exec("unset"));
         });
         return Promise.all($q);
@@ -286,7 +289,7 @@ export abstract class RouterOSAPICrud {
 
                 tmpKey = (addQuestionMark ? "?" : "=") + tmpKey;
 
-                tmpKey = this.camelCaseOrSnakeCaseToDashedCase(tmpKey);
+                tmpKey = utils.camelCaseOrSnakeCaseToDashedCase(tmpKey);
 
                 tmpQuery.push(tmpKey + "=" + tmpVal);
             }
@@ -307,6 +310,16 @@ export abstract class RouterOSAPICrud {
             return Promise.resolve(this.treatMikrotikProperties(results));
         });
     }
+
+    protected lookForIdParameterAndReturnItsValue(): string {
+        let val = null;
+        for (const query of this.queryVal) {
+            if (query.includes("numbers=") || query.includes(".id=")) {
+                val = query.split("=").pop();
+            }
+        }
+        return val;
+    } 
 
     /**
      * Translates .id, place-before and number without using internal
@@ -395,8 +408,8 @@ export abstract class RouterOSAPICrud {
                 if (result.hasOwnProperty(key)) {
                     const tmpVal = result[key];
                     let tmpKey = this.snakeCase
-                        ? this.dashedCaseToSnakeCase(key)
-                        : this.dashedCaseToCamelCase(key);
+                        ? utils.dashedCaseToSnakeCase(key)
+                        : utils.dashedCaseToCamelCase(key);
                     tmpKey = tmpKey.replace(/^\./, "");
                     tmpItem[tmpKey] = tmpVal;
                     if (tmpVal === "true" || tmpVal === "false") {
@@ -431,48 +444,6 @@ export abstract class RouterOSAPICrud {
             } else newItems.push(item);
         }
         return isArray ? newItems : newItems.shift();
-    }
-
-    /**
-     * Transform camelCase or snake_case to dashed-case,
-     * so the routerboard can understand the parameters used
-     * on this wrapper
-     * 
-     * @param val to string to transform
-     */
-    private camelCaseOrSnakeCaseToDashedCase(val: string): string {
-        // Clean any empty space left
-        return val.replace(/ /g, "")
-            // Convert camelCase to dashed
-            .replace(/([a-z][A-Z])/g, (g, w) => {
-                return g[0] + "-" + g[1].toLowerCase();
-            })
-            // Replace any underline to hiphen if used
-            .replace(/_/g, "-");
-    }
-
-    /**
-     * Transform routerboard's dashed-case to camelCase
-     * so we can use objects properties without having to wrap
-     * around quotes
-     * 
-     * @param val the string to transform
-     */
-    private dashedCaseToCamelCase(val: string): string {
-        return val.replace(/-([a-z])/g, (g) => {
-            return g[1].toUpperCase();
-        });
-    }
-
-    /**
-     * Transform routerboard's dashed-case to snake_case
-     * so we can use objects properties without having to wrap
-     * around quotes
-     * 
-     * @param val the string to transform
-     */
-    private dashedCaseToSnakeCase(val: string): string {
-        return val.replace(/-/g, "_");
     }
 
 }
