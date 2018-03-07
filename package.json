@@ -51,6 +51,7 @@
   },
   "dependencies": {
     "debug": "^3.*",
+    "lodash": "^4.*",
     "node-routeros": "^1.*"
   }
 }
