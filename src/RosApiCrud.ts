@@ -74,8 +74,11 @@ export abstract class RouterOSAPICrud {
             ids = this.stringfySearchQuery(ids);
             this.queryVal.push("=numbers=" + ids);
         }
-        const disabledIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
-        return this.exec("disable").then((response: any[]) => {
+        let disabledIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
+        return this.queryForIdsIfNeeded(disabledIds).then((ids: string) => {
+            disabledIds = ids;
+            return this.exec("disable");
+        }).then((response: any[]) => {
             return this.recoverDataFromChangedItems(disabledIds);
         });
     }
@@ -99,8 +102,11 @@ export abstract class RouterOSAPICrud {
             ids = this.stringfySearchQuery(ids);
             this.queryVal.push("=numbers=" + ids);
         }
-        const enabledIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
-        return this.exec("enable").then((response: any[]) => {
+        let enabledIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
+        return this.queryForIdsIfNeeded(enabledIds).then((ids: string) => {
+            enabledIds = ids;
+            return this.exec("enable");
+        }).then((response: any[]) => {
             return this.recoverDataFromChangedItems(enabledIds);
         });
     }
