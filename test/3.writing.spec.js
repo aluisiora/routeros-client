@@ -325,6 +325,26 @@ describe("RouterOSAPICrud", () => {
                 });
             });
 
+            it("should move the third rule above the first rule by querying its comment", (done) => {
+                let foundRule;
+
+                menu.where("comment", "third rule").moveAbove(firstRule).then((response) => {
+                    response.should.have.property("id").and.be.equal(thirdRule);
+                    return menu.getAll();
+                }).then((items) => {
+                    for (const item of items) {
+                        if (foundRule) {
+                            item.id.should.be.equal(firstRule);
+                            break;
+                        } else if (item.id === thirdRule) foundRule = item.id;
+                    }
+                    foundRule.should.exist;
+                    done();
+                }).catch((err) => {
+                    done(err);
+                });
+            });
+
         });
 
         describe("#remove()", () => {

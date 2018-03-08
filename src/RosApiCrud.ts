@@ -144,7 +144,23 @@ export abstract class RouterOSAPICrud {
             this.queryVal.push("=destination=" + to);
         }
         const movedIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
-        return this.exec("move").then((response: any[]) => {
+        return this.exec("move").then(() => {
+            return this.recoverDataFromChangedItems(movedIds);
+        });
+    }
+
+    /**
+     * Move a queried rule above another.
+     * 
+     * @param to where to move the queried rule
+     */
+    public moveAbove(to?: string): Types.SocPromise {
+        let movedIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
+        return this.queryForIdsIfNeeded(movedIds).then((ids: string) => {
+            movedIds = ids;
+            if (to) this.queryVal.push("=destination=" + to);
+            return this.exec("move");
+        }).then(() => {
             return this.recoverDataFromChangedItems(movedIds);
         });
     }
