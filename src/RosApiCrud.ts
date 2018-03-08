@@ -1,5 +1,5 @@
 import { RouterOSAPI, RosException } from "node-routeros";
-import { flatten } from "lodash";
+import { flatten, reduce } from "lodash";
 import * as utils from "./utils";
 import * as Types from "./Types";
 
@@ -221,11 +221,31 @@ export abstract class RouterOSAPICrud {
             ids = this.stringfySearchQuery(ids);
             this.queryVal.push("=numbers=" + ids);
         }
-        const idsForRemoval = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
-        if (!idsForRemoval) return this.exec("remove");
+
+        let idsForRemoval = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
+
+        let queryPromise;
+
+        if (!idsForRemoval) {
+            this.queryVal.push("=.proplist=.id");
+            const query = this.fullQuery("/print");
+            queryPromise = this.write(query);
+        } else {
+            queryPromise = Promise.resolve([]);
+        }
 
         let responseData;
-        return this.recoverDataFromChangedItems(idsForRemoval).then((response: any) => {
+        return queryPromise.then((data: any[]) => {
+            data = reduce(data, (result, value, key) => {
+                result.push(value.id);
+                return result;
+            }, []);
+            idsForRemoval = data + "";
+            this.queryVal.push("=numbers=" + idsForRemoval);
+            return Promise.resolve();
+        }).then(() => {
+            return this.recoverDataFromChangedItems(idsForRemoval);
+        }).then((response: any) => {        
             responseData = response;
             return this.exec("remove");
         }).then(() => {
