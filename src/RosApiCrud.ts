@@ -51,7 +51,7 @@ export abstract class RouterOSAPICrud {
     public add(data: object): Types.SocPromise {
         return this.exec("add", data).then((results: any) => {
             if (results.length === 0) return Promise.resolve(null);
-            return this.recoverDataFromIdsOfChangedItems(null, results[0].ret);
+            return this.recoverDataFromChangedItems(results.shift().ret);
         });
     }
     
@@ -76,7 +76,7 @@ export abstract class RouterOSAPICrud {
         }
         const disabledIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
         return this.exec("disable").then((response: any[]) => {
-            return this.recoverDataFromIdsOfChangedItems(response, disabledIds);
+            return this.recoverDataFromChangedItems(disabledIds);
         });
     }
     
@@ -101,7 +101,7 @@ export abstract class RouterOSAPICrud {
         }
         const enabledIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
         return this.exec("enable").then((response: any[]) => {
-            return this.recoverDataFromIdsOfChangedItems(response, enabledIds);
+            return this.recoverDataFromChangedItems(enabledIds);
         });
     }
     
@@ -139,7 +139,7 @@ export abstract class RouterOSAPICrud {
         }
         const movedIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
         return this.exec("move").then((response: any[]) => {
-            return this.recoverDataFromIdsOfChangedItems(response, movedIds);
+            return this.recoverDataFromChangedItems(movedIds);
         });
     }
 
@@ -157,7 +157,7 @@ export abstract class RouterOSAPICrud {
         this.makeQuery(data);
         const updatedIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
         return this.exec("set").then((response: any[]) => {
-            return this.recoverDataFromIdsOfChangedItems(response, updatedIds);
+            return this.recoverDataFromChangedItems(updatedIds);
         });
     }
 
@@ -224,24 +224,9 @@ export abstract class RouterOSAPICrud {
         const idsForRemoval = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
         if (!idsForRemoval) return this.exec("remove");
 
-        const promises = [];
-        const foundIds = idsForRemoval.split(",");
-        for (const id of foundIds) {
-            const promise = this.rosApi.write([
-                this.pathVal + "/print",
-                "?.id=" + id
-            ]);
-            promises.push(promise);
-        }
         let responseData;
-        return Promise.all(promises).then((data: any) => {
-            if (!data) return Promise.resolve(data);
-            data = flatten(data);
-            data = this.treatMikrotikProperties(data);
-            if (!idsForRemoval.includes(",")) return Promise.resolve(data[0]);
-            return Promise.resolve(data);
-        }).then((data: any) => {
-            responseData = data;
+        return this.recoverDataFromChangedItems(idsForRemoval).then((response: any) => {
+            responseData = response;
             return this.exec("remove");
         }).then(() => {
             return Promise.resolve(responseData);
@@ -501,8 +486,12 @@ export abstract class RouterOSAPICrud {
      * @param data 
      * @param ids 
      */
-    private recoverDataFromIdsOfChangedItems(data: any[], ids?: string): Promise<any | any[]> {
-        if (!ids) return Promise.resolve(data);
+    private recoverDataFromChangedItems(ids?: string): Promise<any | any[]> {
+        if (!ids) {
+            return this.rosApi.write([this.pathVal + "/print"])
+                .then((data) => Promise.resolve(this.treatMikrotikProperties(data).shift()));
+        }
+
         const promises = [];
         const splittedIds = ids.split(",");
         for (const id of splittedIds) {
@@ -516,7 +505,7 @@ export abstract class RouterOSAPICrud {
             if (!data) return Promise.resolve(data);
             data = flatten(data);
             data = this.treatMikrotikProperties(data);
-            if (!ids.includes(",")) return Promise.resolve(data[0]);
+            if (!ids.includes(",")) return Promise.resolve(data.shift());
             return Promise.resolve(data);
         });
     }
