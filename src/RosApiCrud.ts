@@ -131,28 +131,14 @@ export abstract class RouterOSAPICrud {
      */
     public move(from: Types.Id, to?: string | number): Types.SocPromise {
         if (!Array.isArray(from)) from = [from];
-
-        let movedIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
-
-        if (!to && movedIds) {
-            to = from.shift();
-            from = null;
-        }
-
-        if (from) {
-            from = this.stringfySearchQuery(from);
-            this.queryVal.push("=numbers=" + from);
-        }
-
+        from = this.stringfySearchQuery(from);
+        this.queryVal.push("=numbers=" + from);
         if (to) {
             to = this.stringfySearchQuery(to);
             this.queryVal.push("=destination=" + to);
         }
-
-        return this.queryForIdsIfNeeded(movedIds).then((ids: string) => {
-            movedIds = ids;
-            return this.exec("move");
-        }).then(() => {
+        const movedIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
+        return this.exec("move").then((response: any[]) => {
             return this.recoverDataFromChangedItems(movedIds);
         });
     }
