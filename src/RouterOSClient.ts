@@ -42,6 +42,7 @@ export class RouterOSClient extends EventEmitter {
         return this.rosApi.connect().then(() => {
             this.emit("connected", api);
             this.rosApi.once("error", (err: RosException) => this.emit("error", err));
+            this.rosApi.once("close", () => this.emit("close"));
             return Promise.resolve(api);
         }).catch((err: Error) => {
             this.emit("error", err);
