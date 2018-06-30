@@ -1,6 +1,6 @@
 {
   "name": "routeros-client",
-  "version": "0.10.1",
+  "version": "0.10.2",
   "description": "Abstraction layer over the node-routeros API",
   "main": "./dist/index",
   "types": "./dist/index",
@@ -46,12 +46,12 @@
     "mocha": "^4.1.0",
     "source-map-support": "^0.5.3",
     "ts-node": "^3.3.0",
-    "tslint": "^5.9.1",
-    "typescript": "^2.7.2"
+    "tslint": "^5.10.0",
+    "typescript": "^2.9.2"
   },
   "dependencies": {
     "debug": "^3.*",
     "lodash": "^4.*",
-    "node-routeros": "^1.*"
+    "node-routeros": "^1.4.3"
   }
 }
