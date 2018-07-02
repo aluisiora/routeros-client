@@ -130,26 +130,6 @@ export abstract class RouterOSAPICrud {
     }
 
     /**
-     * Moves a rule ABOVE the destination
-     * 
-     * @param from the rule you want to move
-     * @param to the destination where you want to move
-     */
-    public move(from: Types.Id, to?: string | number): Types.SocPromise {
-        if (!Array.isArray(from)) from = [from];
-        from = this.stringfySearchQuery(from);
-        this.queryVal.push("=numbers=" + from);
-        if (to) {
-            to = this.stringfySearchQuery(to);
-            this.queryVal.push("=destination=" + to);
-        }
-        const movedIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
-        return this.exec("move").then(() => {
-            return this.recoverDataFromChangedItems(movedIds);
-        });
-    }
-
-    /**
      * Move a queried rule above another.
      * 
      * @param to where to move the queried rule
@@ -268,6 +248,26 @@ export abstract class RouterOSAPICrud {
      */
     public edit(data: object, ids?: Types.Id): Types.SocPromise {
         return this.update(data, ids);
+    }
+
+    /**
+     * Moves a rule ABOVE the destination
+     * 
+     * @param from the rule you want to move
+     * @param to the destination where you want to move
+     */
+    protected moveEntry(from: Types.Id, to?: string | number): Types.SocPromise {
+        if (!Array.isArray(from)) from = [from];
+        from = this.stringfySearchQuery(from);
+        this.queryVal.push("=numbers=" + from);
+        if (to) {
+            to = this.stringfySearchQuery(to);
+            this.queryVal.push("=destination=" + to);
+        }
+        const movedIds = utils.lookForIdParameterAndReturnItsValue(this.queryVal);
+        return this.exec("move").then(() => {
+            return this.recoverDataFromChangedItems(movedIds);
+        });
     }
 
     /**
@@ -436,7 +436,7 @@ export abstract class RouterOSAPICrud {
         const from = this.placeAfter;
         const to = results[0].ret;
         this.placeAfter = null;
-        return this.move(from, to).then(() => {
+        return this.moveEntry(from, to).then(() => {
             return Promise.resolve(results);
         });
     }

@@ -1,7 +1,7 @@
 import { RouterOSAPI, RosException, RStream } from "node-routeros";
 import { RouterOSAPICrud } from "./RosApiCrud";
 import { RosApiModel } from "./RosApiModel";
-import { SocPromise } from "./Types";
+import * as Types from "./Types";
 import * as debug from "debug";
 
 const info = debug("routeros-client:commands:info");
@@ -38,6 +38,16 @@ export class RosApiCommands extends RouterOSAPICrud {
         commaFields += fields;
         this.proplistVal = commaFields;
         return this;
+    }
+
+    /**
+     * Moves a rule ABOVE the destination
+     * 
+     * @param from the rule you want to move
+     * @param to the destination where you want to move
+     */
+    public move(from: Types.Id, to?: string | number) {
+        return super.moveEntry(from, to);
     }
 
     /**
@@ -243,7 +253,7 @@ export class RosApiCommands extends RouterOSAPICrud {
      * 
      * @param data optional filtering, like what you get when using the where function
      */
-    public get(data?: object): SocPromise {
+    public get(data?: object): Types.SocPromise {
         if (data) this.makeQuery(data, true);
         const query = this.fullQuery("/print");
         return this.write(query);
@@ -254,7 +264,7 @@ export class RosApiCommands extends RouterOSAPICrud {
      * 
      * @param data optional filtering, like what you get when using the where function
      */
-    public getAll(data?: object): SocPromise {
+    public getAll(data?: object): Types.SocPromise {
         return this.get(data);
     }
 
@@ -264,7 +274,7 @@ export class RosApiCommands extends RouterOSAPICrud {
      * 
      * @param data optional filtering, like what you get when using the where function
      */
-    public getModel(data?: object): SocPromise {
+    public getModel(data?: object): Types.SocPromise {
         return this.get(data).then((results) => {
             for (let i = 0; i < results.length; i++) {
                 results[i] = new RosApiModel(this.rosApi, results[i], this.snakeCase);
@@ -280,7 +290,7 @@ export class RosApiCommands extends RouterOSAPICrud {
      * 
      * @param data optional filtering, like what you get when using the where function
      */
-    public print(data?: object): SocPromise {
+    public print(data?: object): Types.SocPromise {
         return this.get(data);
     }
 
