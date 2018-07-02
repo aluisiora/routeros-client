@@ -58,7 +58,7 @@ export class RosApiModel extends RouterOSAPICrud {
      * @param to where to move to
      */
     public move(to?: string | number): Types.SocPromise {
-        return super.move(this.originalItem.id, to).then((response) => {
+        return super.moveEntry(this.originalItem.id, to).then((response) => {
             return this.refreshData(response);
         }).catch((err: RosException) => {
             return Promise.reject(err);
