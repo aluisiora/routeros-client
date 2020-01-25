@@ -53,6 +53,6 @@
     "dependencies": {
         "debug": "^3.*",
         "lodash": "^4.*",
-        "node-routeros": "~1.6.1"
+        "node-routeros": "~1.6.4"
     }
 }
