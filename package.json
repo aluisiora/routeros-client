@@ -51,8 +51,8 @@
         "typescript": "^3.7.5"
     },
     "dependencies": {
-        "debug": "^3.*",
-        "lodash": "^4.*",
-        "node-routeros": "~1.6.4"
+        "debug": "3.x",
+        "lodash": "4.x",
+        "node-routeros": "1.x"
     }
 }
