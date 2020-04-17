@@ -28,7 +28,7 @@ export class RosApiCommands extends RouterOSAPICrud {
     public select(fields: string | string[]): RosApiCommands {
         let commaFields: string = "=.proplist=";
         if (typeof fields === "string") fields = [fields];
-        
+
         for (let i = 0; i < fields.length; i++) {
             const field = fields[i];
             if (/id|dead|nextid/.test(field)) fields[i] = "." + field;
@@ -371,10 +371,29 @@ export class RosApiCommands extends RouterOSAPICrud {
         } else if (action && typeof action === "string") {
             action = "/" + action.replace(/^\//, "");
         }
+
         const query = this.fullQuery(action);
         info("Streaming query %o", query);
         this.queryVal = [];
         this.proplistVal = "";
+
+        if (!callback) {
+            const stream = this.rosApi.stream(query);
+            stream.on("data", (packet: any) => {
+                if (!Array.isArray(packet)) {
+                    packet = this.treatMikrotikProperties([packet])[0];
+                } else {
+                    packet = this.treatMikrotikProperties(packet);
+                }
+                stream.emit("parsed-data", packet);
+            });
+            stream.on("error", (err: any) => {
+                err = this.treatMikrotikProperties([err])[0];
+                stream.emit("parsed-error", err);
+            });
+            return stream;
+        }
+
         return this.rosApi.stream(query, (err: RosException, packet: any, stream: RStream) => {
             if (err) error("When streaming, got error: %o", err);
             if (typeof callback === "function") {
@@ -390,5 +409,5 @@ export class RosApiCommands extends RouterOSAPICrud {
             }
         });
     }
-    
+
 }
