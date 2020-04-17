@@ -1,13 +1,13 @@
 const RouterOSClient = require('../dist').RouterOSClient;
 const chai = require('chai');
-const config = require('./config.json');
+const config = require('./config');
 
 const should = chai.should();
 
 let conn, api;
 
 describe('RosApiCommands', () => {
-    before('should stablish connection and save api object', done => {
+    before('should stablish connection and save api object', (done) => {
         conn = new RouterOSClient({
             host: config.host,
             user: config.user,
@@ -15,19 +15,19 @@ describe('RosApiCommands', () => {
             keepalive: true,
         });
         conn.connect()
-            .then(connApi => {
+            .then((connApi) => {
                 api = connApi;
                 done();
             })
-            .catch(err => {
+            .catch((err) => {
                 done(err);
             });
     });
 
-    describe('streaming content', function() {
+    describe('streaming content', function () {
         this.timeout(12000);
 
-        it('should stream torch on interface 1 and stop after 5 seconds', done => {
+        it('should stream torch on interface 1 and stop after 5 seconds', (done) => {
             const menu = api.menu('/tool/torch');
             let started = false;
             menu.where('interface', 'ether1').stream((err, packet, torch) => {
@@ -42,7 +42,7 @@ describe('RosApiCommands', () => {
                             .then(() => {
                                 done();
                             })
-                            .catch(err => {
+                            .catch((err) => {
                                 done(err);
                             });
                     }, 5000);
@@ -51,12 +51,12 @@ describe('RosApiCommands', () => {
         });
     });
 
-    after('should disconnect', done => {
+    after('should disconnect', (done) => {
         conn.close()
             .then(() => {
                 done();
             })
-            .catch(err => {
+            .catch((err) => {
                 done(err);
             });
     });
