@@ -31,7 +31,7 @@ export class RosApiCommands extends RouterOSAPICrud {
 
         for (let i = 0; i < fields.length; i++) {
             const field = fields[i];
-            if (/id|dead|nextid/.test(field)) fields[i] = "." + field;
+            if (/^(id|dead|nextid)$/.test(field)) fields[i] = "." + field;
         }
 
         // Convert array to a string comma separated 
