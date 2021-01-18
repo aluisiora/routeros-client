@@ -1,6 +1,6 @@
 {
     "name": "routeros-client",
-    "version": "1.1.1",
+    "version": "1.1.2",
     "description": "Abstraction layer over the node-routeros API",
     "main": "./dist/index",
     "types": "./dist/index",

@@ -1,3 +1,7 @@
+# Discontinued
+
+***I worked on this project in my spare time, but unfortunately I no longer work with mikrotik devices and don't have the free time anymore, so consider it as discontinued. Feel free to fork this project and create your own spin.***
+
 # RouterOS Client
 This is a client wrapper for [node-routeros](https://github.com/aluisiora/node-routeros) api for doing common tasks and making the api easier to use for small and large NodeJS projects.
 
